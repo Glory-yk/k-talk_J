@@ -6,3 +6,4 @@ _코다리 에이전트만 읽고 쓰는 개인 노트. 학습·교훈·자주 �
 
 - [2026-08-22] Makemoney AI Lab 웹사이트와 K-Talk AI 결제 시스템 연동 확인 후 수익화 전략 검토 및 제안 → 산출물 sessions/2026-08-22T21-28/developer.md
 - [2026-08-23] Makemoney AI Lab 웹사이트의 테스트 및 버그 수정 → 산출물 sessions/2026-08-23T20-55/developer.md
+- [2026-08-23] 웹사이트 테스트 및 버그 수정 → 산출물 sessions/2026-08-23T21-18/developer.md
