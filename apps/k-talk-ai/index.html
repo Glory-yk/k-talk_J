@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>K-Talk AI — 渡韓前の3分！AI韓国語スピーキング＆発音診断</title>
+  <meta name="description" content="AIがあなたの韓国語発音をネイティブ級に診断！オリーブヤング、聖水カフェ、明洞グルメでの実戦ロールプレイングで旅行前の不安をゼロに。">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-badge">🇰🇷</div>
+        <div class="brand-info">
+          <h1>K-Talk AI</h1>
+          <span>AI 韓国語スピーキング診断</span>
+        </div>
+      </div>
+      <div class="trial-badge" id="trialCounter">無料体験: 残り 3回</div>
+    </header>
+
+    <!-- 1. Home View: Scenario Selection -->
+    <main id="homeView" class="view">
+      <section class="hero-section">
+        <div class="hero-tag">✨ 渡韓日本人女子に大人気</div>
+        <h2 class="hero-title">旅行先で恥をかかない！<br><span>AI発音採点＆実戦英会話</span></h2>
+        <p class="hero-sub">ネイティブ相手だと緊張するあなたへ。<br>AI相手だから何度失敗しても大丈夫！</p>
+      </section>
+
+      <div class="section-label">📍 実戦シチュエーション選択</div>
+      <div id="scenarioList" class="scenario-list">
+        <!-- Rendered dynamically by scenarios.js -->
+      </div>
+    </main>
+
+    <!-- 2. Chat & Roleplay View -->
+    <main id="chatView" class="view hidden">
+      <nav class="chat-nav">
+        <button class="btn-back" onclick="goHome()">‹ 戻る</button>
+        <span class="scenario-current-title" id="scenarioTitle">オリーブヤングでお買い物</span>
+        <div style="width: 50px;"></div>
+      </nav>
+
+      <!-- Message History -->
+      <div class="messages-container" id="messagesContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Recording Control Bar -->
+      <div class="control-bar">
+        <div class="waveform" id="waveform">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="status-text" id="statusText">マイクボタンを押して発音してください 🎙️</div>
+        <div class="mic-btn-wrapper">
+          <button class="btn-mic" id="micBtn" aria-label="録音ボタン">🎙️</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- 3. Pronunciation Score Modal -->
+    <div id="scoreModal" class="modal-backdrop">
+      <div class="modal-card">
+        <div class="score-circle-wrapper">
+          <div class="score-num" id="modalScoreNum">95</div>
+          <div class="score-grade" id="modalScoreGrade">RANK: S</div>
+        </div>
+        <h3 class="score-title" id="modalScoreTitle">完璧な発音です！🎉</h3>
+        <p class="score-feedback" id="modalScoreFeedback">ネイティブと同じように自然に伝わります。自信を持って使ってください！</p>
+        <button class="btn-primary" id="btnModalContinue" onclick="continueDialogue()">次へ進む ›</button>
+      </div>
+    </div>
+
+    <!-- 4. Paywall Modal (Trial Expired & PayPal Checkout) -->
+    <div id="paywallModal" class="modal-backdrop">
+      <div class="modal-card">
+        <button class="btn-close-modal" onclick="closePaywallModal()" aria-label="閉じる">✕</button>
+        <div class="paywall-icon">👑</div>
+        <div class="paywall-badge">PRO ACCESS</div>
+        <h3 class="paywall-title">無料体験が終了しました</h3>
+        <p class="paywall-sub">渡韓パスを購入して、全シチュエーション＆無制限AI発音診断を解放しましょう！</p>
+
+        <div class="pricing-plans">
+          <div class="plan-card active" id="planTrip" onclick="selectPlan('trip')">
+            <div>
+              <div class="plan-name">✈️ 7日間 渡韓集中パス</div>
+              <div class="plan-desc">旅行直前の集中練習に最適！</div>
+            </div>
+            <div class="plan-price">$4.99</div>
+          </div>
+
+          <div class="plan-card" id="planMonthly" onclick="selectPlan('monthly')">
+            <div>
+              <div class="plan-name">💎 月額使い放題パス</div>
+              <div class="plan-desc">K-POP・ドラマ学習にも無制限</div>
+            </div>
+            <div class="plan-price">$9.99<span style="font-size: 11px;">/mo</span></div>
+          </div>
+        </div>
+
+        <!-- PayPal Smart Button Container -->
+        <div id="paypal-button-container" style="margin-top: 16px; min-height: 45px;"></div>
+
+        <!-- Fallback Demo / Direct Pay button -->
+        <button class="btn-primary" id="btnFallbackPay" style="display: none; margin-top: 10px;"
+          onclick="purchasePlan(selectedPlanType)">
+          今すぐ解放する ⚡
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PayPal JavaScript SDK (USD 통화 설정) -->
+  <script
+    src="https://www.paypal.com/sdk/js?client-id=BAAlLIYF2CPhYH94hbDYpHmxXaiJrNxpBZgIsaWWfUxtGl8fN-urwE02tNhErQporVl1A-iuEMLMJpVoMA&currency=USD"></script>
+  <script src="scenarios.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

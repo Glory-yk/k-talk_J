@@ -1,7 +1,7 @@
 {
   "name": "connect-ai-lab",
-  "displayName": "Connect AI — AI 1인 기업 · 나만의 에이전트 팀 · 제2의 두뇌",
-  "description": "AI 1인 기업가를 위한 워크스페이스. 나만의 AI 에이전트 팀과 제2의 두뇌가 한 곳에서 — CEO + 전문 에이전트들이 내 지식·결정 로그·메모리를 컨텍스트로 24시간 미션 향해 자동으로 일합니다. 100% 로컬·오프라인·무료.",
+  "displayName": "Makemoney AI Lab — 1인 AI 수익화 & 자동화 에이전시",
+  "description": "1인 AI 수익화 & 자동화 에이전시를 위한 올인원 워크스페이스. CEO, 수익화 전략가, AI 엔지니어, 카피라이터, 전담 비서 팀이 로컬 Ollama 환경에서 24시간 자율적으로 동작합니다. 100% 로컬·오프라인·보안 보장.",
   "version": "2.89.157",
   "publisher": "connectailab",
   "license": "MIT",
@@ -251,18 +251,18 @@
         },
         "connectAiLab.defaultModel": {
           "type": "string",
-          "default": "",
-          "description": "🧠 사용할 AI 모델 이름 (비워두면 설치된 모델 중 가장 작은 것이 자동 선택됨. 직접 지정 예: llama3.2:1b, gemma2:2b, qwen2.5:1.5b)"
+          "default": "qwen3.5:9b",
+          "description": "🧠 사용할 AI 모델 이름 (기본: qwen3.5:9b 초고속 로드, 에이전트별 자동 분업)"
         },
         "connectAiLab.requestTimeout": {
           "type": "number",
-          "default": 300,
-          "description": "⏱ AI 응답 대기 시간 (초, 기본 300초 = 5분)"
+          "default": 600,
+          "description": "⏱ AI 응답 대기 시간 (초, 기본 600초 = 10분)"
         },
         "connectAiLab.streamFirstTokenTimeoutSec": {
           "type": "number",
-          "default": 240,
-          "description": "🐢 모델 첫 토큰까지 기다리는 시간 (초). 저사양 머신은 모델 로드에 시간 걸려서 60초 안에 첫 응답 못 옴. 기본 240초(4분). 600초(10분)까지 늘려도 OK."
+          "default": 600,
+          "description": "🐢 모델 첫 토큰까지 기다리는 시간 (초, 기본 600초 = 10분 대기로 타임아웃 방지)"
         },
         "connectAiLab.streamIdleTimeoutSec": {
           "type": "number",

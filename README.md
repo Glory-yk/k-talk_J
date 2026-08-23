@@ -1,26 +1,26 @@
 <p align="center">
-  <img src="assets/icon.png" width="120" alt="Connect AI Logo" />
+  <img src="assets/icon.png" width="120" alt="Makemoney AI Lab Logo" />
 </p>
 
-<h1 align="center">Connect AI v2 (P-Reinforce)</h1>
+<h1 align="center">Makemoney AI Lab</h1>
 
 <p align="center">
-  <strong>100% Local · 100% Offline · Autonomous Knowledge Engine</strong><br/>
-  VS Code / Cursor 확장 프로그램으로, 당신의 낡은 IDE를 최상위 에이전트 대학(A.U)의 심장으로 진화시킵니다.
+  <strong>100% Local · 100% Offline · 1인 AI 수익화 & 자동화 에이전시</strong><br/>
+  VS Code / Cursor 확장 프로그램으로, 나만의 1인 기업 전담 AI 에이전트 팀과 제2의 두뇌를 로컬 환경에서 가동합니다.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.1.30-blue" alt="version" />
+  <img src="https://img.shields.io/badge/version-2.89.157-blue" alt="version" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="license" />
-  <img src="https://img.shields.io/badge/integration-Agent_University-purple" alt="integration" />
-  <img src="https://img.shields.io/badge/engine-Ollama%20%7C%20LM%20Studio-orange" alt="engine" />
+  <img src="https://img.shields.io/badge/engine-Ollama%20100%25%20Local-orange" alt="engine" />
 </p>
 
 ---
 
-## 🌟 Overview: The P-Reinforce Architecture
+## 🌟 Overview: Makemoney AI Lab
 
-Connect AI v2.1.30은 단순한 코딩 에이전트를 넘어섭니다. **P-Reinforce 아키텍처**를 기반으로 설계된 이 에이전트는 사용자의 모든 정보와 지시를 받아들여 **스스로 의미를 분석하고, 폴더를 생성하고, 마크다운 위키 파일로 정리하여 클라우드에 자동 백업**하는 자율 지식 정원사(Autonomous Gardener)입니다.
+**Makemoney AI Lab**은 1인 기업가를 위한 AI 자동화 및 수익화 전용 워크스페이스입니다.
+CEO, 비즈니스 전략가, 풀스택 AI 엔지니어, 카피라이터, 전담 스마트 비서가 협업하여 사용자의 지식, 전략, 코드를 24시간 자율적으로 정리하고 실행합니다.
 
 ---
 

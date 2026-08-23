@@ -1339,9 +1339,31 @@ function _agentModelsPath(): string {
 function readAgentModelMap(): Record<string, string> {
   try {
     const p = _agentModelsPath();
-    if (!fs.existsSync(p)) return {};
-    const data = JSON.parse(fs.readFileSync(p, 'utf-8') || '{}');
-    return (data && typeof data === 'object') ? data : {};
+    if (fs.existsSync(p)) {
+      const data = JSON.parse(fs.readFileSync(p, 'utf-8') || '{}');
+      if (data && typeof data === 'object' && Object.keys(data).length > 0) return data;
+    }
+    // 워크스페이스 내 _company fallback
+    const wsFolders = vscode.workspace.workspaceFolders;
+    if (wsFolders && wsFolders.length > 0) {
+      const wsP = path.join(wsFolders[0].uri.fsPath, '_company', '_shared', 'agent_models.json');
+      if (fs.existsSync(wsP)) {
+        const wsData = JSON.parse(fs.readFileSync(wsP, 'utf-8') || '{}');
+        if (wsData && typeof wsData === 'object' && Object.keys(wsData).length > 0) return wsData;
+      }
+    }
+    return {
+      ceo: 'qwen3.5:9b',
+      business: 'qwen3.5:9b',
+      developer: 'gemma4-coding:latest',
+      writer: 'qwen3.5:9b',
+      secretary: 'qwen3.5:9b',
+      youtube: 'qwen3.5:9b',
+      instagram: 'qwen3.5:9b',
+      designer: 'gemma4:e4b',
+      editor: 'gemma4:e4b',
+      researcher: 'qwen3.5:9b'
+    };
   } catch { return {}; }
 }
 function writeAgentModelMap(map: Record<string, string>) {
@@ -1355,7 +1377,10 @@ function writeAgentModelMap(map: Record<string, string>) {
 }
 function getAgentModel(agentId: string, fallback: string): string {
   const map = readAgentModelMap();
-  return (map[agentId] || '').trim() || fallback;
+  const picked = (map[agentId] || '').trim();
+  if (picked && !/embed|nomic|bge|bert/i.test(picked)) return picked;
+  if (fallback && !/embed|nomic|bge|bert/i.test(fallback)) return fallback;
+  return 'qwen2.5:7b';
 }
 /* v2.89.65 — getSystemSpecs + estimateModelMemoryGB + SystemSpecs type 모두 ./system-specs.ts 로 이동. */
 import { SystemSpecs, getSystemSpecs, estimateModelMemoryGB } from './system-specs';
@@ -1366,10 +1391,12 @@ type ModelTier = 'tiny' | 'small' | 'medium' | 'large' | 'vision' | 'coder';
 function _classifyModel(modelId: string): ModelTier[] {
   const id = modelId.toLowerCase();
   const tiers: ModelTier[] = [];
+  /* 임베딩 전용 모델은 채팅/티어에서 배제 */
+  if (/embed|nomic|bge|bert/i.test(id)) return tiers;
   /* 비전 모델 — 이미지 입력 가능 */
   if (/vision|llava|vl\b|glm.*v|gemma.?4.*e|qwen.?2.?vl|moondream/i.test(id)) tiers.push('vision');
   /* 코드 특화 */
-  if (/coder|code-?(?:llama|qwen)/i.test(id)) tiers.push('coder');
+  if (/coder|coding|code-?(?:llama|qwen|gemma)/i.test(id)) tiers.push('coder');
   /* 사이즈 — 우선순위: 명시된 파라미터 → 모델 이름 패턴 */
   const paramM = id.match(/(\d+(?:\.\d+)?)\s*b\b/);
   let paramB = paramM ? parseFloat(paramM[1]) : 0;
@@ -1379,53 +1406,70 @@ function _classifyModel(modelId: string): ModelTier[] {
   /* LFM 패밀리 + Phi + Gemma E2B 같이 작은 모델 패턴 */
   const isExplicitlyTiny = /lfm2\.?5|gemma.?4.?e2b|phi-?3|llama.?3\.?2.?(?:1b|3b)|qwen.?2\.?5.?(?:0\.5b|1\.5b|3b)/i.test(id);
   if (isExplicitlyTiny || (paramB > 0 && paramB <= 3)) tiers.push('tiny');
-  else if (paramB <= 8) tiers.push('small');
-  else if (paramB <= 14) tiers.push('medium');
+  else if (paramB > 0 && paramB <= 8) tiers.push('small');
+  else if (paramB > 8 && paramB <= 14) tiers.push('medium');
   else if (paramB > 14) tiers.push('large');
+  else if (/qwen3\.5:27b|gemma4:31b|gemma4:26b|qwen3-coder:30b/i.test(id)) tiers.push('large');
+  else if (/qwen3\.5:9b|gemma4:e4b/i.test(id)) tiers.push('medium');
   else tiers.push('small'); /* 사이즈 알 수 없으면 small로 안전 폴백 */
   return tiers;
 }
 function _autoOrchestrateModelMap(installed: { id: string; backend: string }[]): Record<string, string> {
   if (installed.length === 0) return {};
-  /* v2.89.36 — 메모리 안전 필터. 사용자 머신이 못 돌리는 큰 모델은 후보에서 제외.
-     이전엔 16GB Mac에 70B 모델 할당해서 LM Studio가 죽었음. */
+  /* 임베딩 전용 모델 필터링 */
+  const chatInstalled = installed.filter(m => !/embed|nomic|bge|bert/i.test(m.id));
+  if (chatInstalled.length === 0) return {};
+
   const specs = getSystemSpecs();
-  const safeInstalled = installed.filter(m => {
+  const safeInstalled = chatInstalled.filter(m => {
     const need = estimateModelMemoryGB(m.id);
     return need <= specs.safeModelBudgetGB;
   });
-  /* 안전 필터로 다 잘려나가면 제일 작은 1개라도 남기기 (그래야 사용자가 일단 돌릴 수 있음) */
-  const candidates = safeInstalled.length > 0 ? safeInstalled : (
-    installed.length > 0
-      ? [installed.slice().sort((a, b) => estimateModelMemoryGB(a.id) - estimateModelMemoryGB(b.id))[0]]
-      : []
-  );
-  /* 모델별 tier 분류 + 우선순위 정렬 */
+  const candidates = safeInstalled.length > 0 ? safeInstalled : chatInstalled;
+
+  /* 모델별 tier 분류 */
   const byTier: Record<ModelTier, string[]> = { tiny: [], small: [], medium: [], large: [], vision: [], coder: [] };
   for (const m of candidates) {
     const tiers = _classifyModel(m.id);
     for (const t of tiers) byTier[t].push(m.id);
   }
-  /* 에이전트별 선호 tier 순서 — 첫번째가 best, 못 찾으면 다음으로 폴백 */
+
+  // 빠른 응답을 위해 small 티어에서는 qwen2.5:7b 우선 정렬, medium에서는 qwen3.5/gemma4 우선 정렬
+  if (byTier['small']) {
+    byTier['small'].sort((a, b) => {
+      const aScore = /qwen2\.5:7b|qwen2\.5/i.test(a) ? 2 : (/llama3\.2/i.test(a) ? 1 : 0);
+      const bScore = /qwen2\.5:7b|qwen2\.5/i.test(b) ? 2 : (/llama3\.2/i.test(b) ? 1 : 0);
+      return bScore - aScore;
+    });
+  }
+  if (byTier['medium']) {
+    byTier['medium'].sort((a, b) => {
+      const aScore = /qwen3\.5|gemma4/i.test(a) ? 1 : 0;
+      const bScore = /qwen3\.5|gemma4/i.test(b) ? 1 : 0;
+      return bScore - aScore;
+    });
+  }
+
+  /* 1인 기업 에이전트별 최적 모델 Tier 선호 순서 */
   const ROLE_PREFERENCES: Record<string, ModelTier[]> = {
-    ceo: ['tiny', 'small', 'medium'],         /* 라우팅 결정 — 빠른 게 최우선 */
-    secretary: ['small', 'tiny', 'medium'],   /* 일정·대화 — 균형 */
-    youtube: ['large', 'medium', 'small'],    /* 데이터 분석 — 큰 모델 */
-    researcher: ['large', 'medium', 'small'], /* 리서치 — 큰 모델 */
-    business: ['medium', 'large', 'small'],   /* KPI·전략 — 추론 */
-    writer: ['medium', 'small', 'large'],     /* 창작 — 중간 */
-    editor: ['medium', 'small'],              /* 영상 디렉션 */
-    designer: ['vision', 'medium', 'small'],  /* 비전 우선 */
-    developer: ['coder', 'large', 'medium'],  /* 코드 우선 */
-    instagram: ['medium', 'small'],
+    ceo: ['small', 'medium', 'tiny'],         /* 1인 기업 총괄 판단 — Qwen2.5 7B 초고속 (thinking 없음) */
+    secretary: ['small', 'tiny', 'medium'],   /* 데일리 브리핑/비서 — Qwen2.5 7B 초고속 */
+    writer: ['small', 'medium', 'large'],     /* 세일즈 카피 & 글쓰기 — Qwen2.5 7B */
+    youtube: ['small', 'medium', 'large'],    /* 유튜브 기획 — Qwen2.5 7B */
+    instagram: ['small', 'medium', 'large'],  /* SNS 마케팅 — Qwen2.5 7B */
+    business: ['medium', 'large', 'small'],   /* 수익화 전략 및 BM — Qwen3.5 9B 추론 */
+    researcher: ['medium', 'large', 'small'], /* 시장 데이터 리서치 — Qwen3.5 9B 추론 */
+    developer: ['coder', 'large', 'medium'],  /* 개발 & 자동화 — Gemma4-coding / Qwen3-coder */
+    designer: ['vision', 'medium', 'small'],  /* 디자인/비주얼 — Gemma4 E4B / Vision */
+    editor: ['medium', 'small', 'large'],     /* 사운드 디렉션 — Gemma4 E4B */
   };
   const map: Record<string, string> = {};
   for (const agentId of Object.keys(ROLE_PREFERENCES)) {
     const prefs = ROLE_PREFERENCES[agentId];
     for (const tier of prefs) {
-      const candidates = byTier[tier];
-      if (candidates && candidates.length > 0) {
-        map[agentId] = candidates[0];
+      const tierCandidates = byTier[tier];
+      if (tierCandidates && tierCandidates.length > 0) {
+        map[agentId] = tierCandidates[0];
         break;
       }
     }
@@ -7819,29 +7863,49 @@ function _autoPickInstalledModelIfMissing() {
         try {
             const cfg = vscode.workspace.getConfiguration('connectAiLab');
             const current = (cfg.get<string>('defaultModel') || '').trim();
-            if (current) return; // 사용자가 이미 골랐음 — 절대 건드리지 않음
+            // 만약 현재 설정된 모델이 임베딩 모델(nomic 등)이거나 비어있으면 올바른 챗 모델로 재설정
+            const isInvalidEmbed = /embed|nomic|bge|bert/i.test(current);
+            if (current && !isInvalidEmbed) return; // 유효한 챗 모델이 이미 설정되어 있으면 유지
+
             const url = (cfg.get<string>('ollamaUrl') || 'http://127.0.0.1:11434').trim();
             const isLM = url.includes('1234') || url.includes('/v1');
             if (isLM) {
                 try {
                     const r = await axios.get(`${url}/v1/models`, { timeout: 1500 });
                     const models = (r.data?.data || []) as Array<{ id: string }>;
-                    if (models.length > 0) {
-                        await cfg.update('defaultModel', models[0].id, vscode.ConfigurationTarget.Global);
-                        console.log(`Connect AI: auto-picked LM Studio model → ${models[0].id}`);
+                    const chatModels = models.filter(m => !/embed|nomic|bge|bert/i.test(m.id));
+                    if (chatModels.length > 0) {
+                        // Qwen / Gemma 우선
+                        chatModels.sort((a, b) => {
+                            const aScore = /qwen3\.5|gemma4/i.test(a.id) ? 1 : 0;
+                            const bScore = /qwen3\.5|gemma4/i.test(b.id) ? 1 : 0;
+                            return bScore - aScore;
+                        });
+                        await cfg.update('defaultModel', chatModels[0].id, vscode.ConfigurationTarget.Global);
+                        console.log(`Connect AI: auto-picked LM Studio model → ${chatModels[0].id}`);
                     }
-                } catch { /* LM Studio 미실행 — 다음 활성화 때 다시 시도 */ }
+                } catch { /* LM Studio 미실행 */ }
             } else {
                 try {
                     const r = await axios.get(`${url}/api/tags`, { timeout: 1500 });
                     const models = (r.data?.models || []) as Array<{ name: string; size: number }>;
-                    if (models.length > 0) {
-                        // 가장 작은 모델부터 — 첫 호출 실패 진입 장벽 최소화
-                        models.sort((a, b) => (a.size || 0) - (b.size || 0));
-                        await cfg.update('defaultModel', models[0].name, vscode.ConfigurationTarget.Global);
-                        console.log(`Connect AI: auto-picked Ollama model → ${models[0].name} (${(models[0].size / 1e9).toFixed(2)} GB)`);
+                    const chatModels = models.filter(m => !/embed|nomic|bge|bert/i.test(m.name));
+                    if (chatModels.length > 0) {
+                        // 빠른 응답을 위해 Qwen2.5:7b, Gemma4:e4b, Llama3.2 우선 정렬
+                        chatModels.sort((a, b) => {
+                            const score = (name: string) => {
+                                if (/qwen2\.5:7b|qwen2\.5/i.test(name)) return 4;
+                                if (/gemma4:e4b/i.test(name)) return 3;
+                                if (/llama3\.2/i.test(name)) return 2;
+                                if (/qwen3\.5|gemma4/i.test(name)) return 1;
+                                return 0;
+                            };
+                            return score(b.name) - score(a.name);
+                        });
+                        await cfg.update('defaultModel', chatModels[0].name, vscode.ConfigurationTarget.Global);
+                        console.log(`Connect AI: auto-picked Ollama model → ${chatModels[0].name} (${(chatModels[0].size / 1e9).toFixed(2)} GB)`);
                     }
-                } catch { /* Ollama 미실행 — 다음 활성화 때 다시 시도 */ }
+                } catch { /* Ollama 미실행 */ }
             }
         } catch (e) {
             console.error('Connect AI: auto-pick model failed', e);
