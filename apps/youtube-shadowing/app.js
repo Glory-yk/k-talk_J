@@ -515,12 +515,15 @@ window.openEditModal = function(idx) {
   if (endInput) endInput.value = s.end || 0;
   
   const modal = document.getElementById('edit-sentence-modal');
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    modal.classList.add('active');
+    setTimeout(() => { if (txtInput) txtInput.focus(); }, 50);
+  }
 };
 
 window.closeEditModal = function() {
   const modal = document.getElementById('edit-sentence-modal');
-  if (modal) modal.style.display = 'none';
+  if (modal) modal.classList.remove('active');
   editingSentenceIndex = null;
 };
 
