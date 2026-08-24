@@ -1,0 +1,10 @@
+<find></find><replace>{
+  "status": "PENDING",
+  "message": "PayPal API 키 입력 대기 중 — CEO 마스터 (사장님) 에게 발급 요청 필요",
+  "steps": [
+    "1. PayPal Developer Dashboard 에서 앱 생성 및 Client ID/Secret 발급",
+    "2. `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json` 파일에 입력",
+    "3. 코다리 에이전트가 `paypal_revenue.py` 테스트 실행 후 첫 매출 데이터 수집"
+  ],
+  "expected_action": "사장님, PayPal Developer Dashboard 로그인 → 앱 생성 → Client ID/Secret 복사 → 아래 파일에 입력해 주세요."
+}</replace>
