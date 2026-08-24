@@ -312,78 +312,106 @@
     <span><span class="kbd">T</span>번역 숨김</span>
   </footer>
 
-  <!-- Edit Sentence In-App Modal -->
-  <div id="edit-sentence-modal" class="app-modal" style="display: none;">
-    <div class="modal-backdrop" onclick="closeEditModal()"></div>
-    <div class="modal-card">
+  <!-- Advanced Sentence Edit & Multi-Cut Modal (from Shadowingapp_claude) -->
+  <div id="editModalOverlay" class="app-modal">
+    <div class="modal-backdrop" onclick="closeAdvancedEditModal()"></div>
+    <div class="modal-card" style="max-width: 660px; width: 95%;">
       <div class="modal-header">
-        <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
-          <span>✏️</span> 문장 및 타임스탬프 수정
+        <h3 id="editModalTitle" style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+          <span>✂</span> 문장 편집 & 잘라내기
         </h3>
-        <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+        <button class="modal-close-btn" onclick="closeAdvancedEditModal()">✕</button>
       </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem; padding: 1.25rem 0;">
-        <div class="form-group">
-          <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600;">원문 대본</label>
-          <textarea id="modal-edit-text" rows="3" class="modal-input"></textarea>
-        </div>
-        <div class="form-group">
-          <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600;">번역 해석</label>
-          <textarea id="modal-edit-trans" rows="2" class="modal-input"></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem;">
-          <div class="form-group" style="flex: 1;">
-            <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600;">시작 시간 (초)</label>
-            <input type="number" step="0.1" id="modal-edit-start" class="modal-input" />
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600;">종료 시간 (초)</label>
-            <input type="number" step="0.1" id="modal-edit-end" class="modal-input" />
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid var(--border-glass); padding-top: 1rem;">
-        <button class="toggle-btn" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;" onclick="closeEditModal()">취소</button>
-        <button class="btn-load" style="padding: 0.6rem 1.4rem; font-size: 0.85rem;" onclick="saveEditedSentence()">저장 완료</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Split Sentence In-App Modal -->
-  <div id="split-sentence-modal" class="app-modal">
-    <div class="modal-backdrop" onclick="closeSplitModal()"></div>
-    <div class="modal-card" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
-          <span>✂️</span> 단어 클릭 문장 나누기
-        </h3>
-        <button class="modal-close-btn" onclick="closeSplitModal()">✕</button>
-      </div>
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.25rem; padding: 1.25rem 0;">
-        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
-          💡 <strong>새 문장을 시작할 단어</strong>를 클릭하세요. 해당 단어부터 자동으로 다음 문장으로 분할됩니다.
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.1rem; padding: 1.25rem 0;">
+        <p id="editModalHint" style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+          💡 <strong>단어를 클릭하면 그 앞에서 분할(✂)</strong>됩니다. 여러 단어를 클릭해 여러 구간으로 동시에 나눌 수 있습니다.
         </p>
 
-        <!-- Clickable Words Container -->
-        <div id="split-words-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; background: rgba(0, 0, 0, 0.4); border-radius: 12px; border: 1px solid var(--border-glass); min-height: 80px; align-items: center;">
-          <!-- Injected dynamically via JS -->
+        <!-- Interactive Words with Multi-Cut Markers -->
+        <div id="editWords" class="edit-words"></div>
+
+        <!-- Calculated Sub-Segments Timeline & Audio Preview -->
+        <div>
+          <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-bottom: 0.4rem;">
+            분할될 구간 미리듣기 (클릭 시 해당 구간만 재생):
+          </div>
+          <div id="editTimeline" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
         </div>
 
-        <!-- Live Split Preview Box -->
-        <div id="split-preview-box" style="display: flex; flex-direction: column; gap: 0.5rem; background: rgba(99, 102, 241, 0.08); border: 1px dashed var(--accent-primary); border-radius: 10px; padding: 0.85rem; font-size: 0.85rem;">
-          <div style="color: var(--text-muted); font-size: 0.8rem;">분할 미리보기:</div>
-          <div id="split-preview-part1" style="color: var(--accent-cyan); font-weight: 600;">[문장 1] 단어를 마우스로 올려보세요</div>
-          <div id="split-preview-part2" style="color: var(--accent-amber); font-weight: 600;">[문장 2] ...</div>
+        <!-- Timing Fine-Tuning Section (from Shadowingapp_claude) -->
+        <div class="timing-section" id="timingSection">
+          <h4 style="margin: 0 0 10px; color: var(--text-main); font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <span>⏱</span> 시작 / 종료 시간 미세 조정 (Timing Fine-Tuning)
+          </h4>
+
+          <input type="hidden" id="timingStartInput" value="0">
+          <input type="hidden" id="timingEndInput" value="0">
+
+          <!-- Visual Slider Range Bar -->
+          <div class="timing-bar-wrap" id="timingBarWrap">
+            <div class="timing-bar-range" id="timingBarRange"></div>
+            <div class="timing-handle" id="timingHandleStart" title="드래그하여 시작 시간 조절"></div>
+            <div class="timing-handle end-handle" id="timingHandleEnd" title="드래그하여 종료 시간 조절"></div>
+            <div class="timing-play-pos" id="timingPlayPos"></div>
+          </div>
+          <div class="timing-time-labels">
+            <span id="timingLabelLeft">0s</span>
+            <span id="timingLabelMid" style="position: absolute; left: 50%; transform: translateX(-50%); font-weight: 600; color: var(--accent-cyan);"></span>
+            <span id="timingLabelRight">30s</span>
+          </div>
+
+          <!-- Current Video Time & Live Marking Buttons -->
+          <div style="display: flex; gap: 10px; margin: 12px 0;">
+            <button onclick="setTimingFromVideo('start')" class="timing-mark-btn start" id="timingBtnStart">
+              <span>[ 시작점 설정 (I) ]</span>
+              <span class="timing-val-display" id="timingStartDisplay">--</span>
+            </button>
+            <button onclick="setTimingFromVideo('end')" class="timing-mark-btn end" id="timingBtnEnd">
+              <span>[ 종료점 설정 (O) ]</span>
+              <span class="timing-val-display" id="timingEndDisplay">--</span>
+            </button>
+          </div>
+
+          <!-- Nudge +/- 0.1s Buttons & Preview -->
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 12px;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">미세 조정:</span>
+            <button class="timing-set-btn" onclick="nudgeTiming('start', -0.1)">시작 -0.1s</button>
+            <button class="timing-set-btn" onclick="nudgeTiming('start', 0.1)">시작 +0.1s</button>
+            <button class="timing-set-btn" onclick="nudgeTiming('end', -0.1)">끝 -0.1s</button>
+            <button class="timing-set-btn" onclick="nudgeTiming('end', 0.1)">끝 +0.1s</button>
+            <button class="timing-set-btn preview" onclick="previewCurrentTiming()">▶ 구간 미리듣기</button>
+          </div>
+        </div>
+
+        <!-- Direct Text Edit Section -->
+        <div id="textEditSection" style="display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px solid var(--border-glass); padding-top: 0.8rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">대본 / 번역 직접 수정</label>
+          </div>
+          <textarea id="textEditInput" rows="2" class="modal-input" placeholder="원문 대본"></textarea>
+          <textarea id="textEditTransInput" rows="1" class="modal-input" placeholder="한국어 번역 해석"></textarea>
         </div>
       </div>
-      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid var(--border-glass); padding-top: 1rem;">
-        <button class="toggle-btn" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;" onclick="closeSplitModal()">닫기</button>
+
+      <!-- Modal Action Bar -->
+      <div class="edit-actions" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-glass); padding-top: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="edit-btn primary" onclick="applyEditSplit()">✂ 분할 적용</button>
+          <button class="edit-btn secondary" onclick="previewEditSegment()">▶ 전체 듣기</button>
+          <button class="edit-btn danger" id="mergePrevBtn" onclick="applyEditMergePrev()">+ 이전과 합치기</button>
+          <button class="edit-btn danger" id="mergeNextBtn" onclick="applyEditMergeNext()">+ 다음과 합치기</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="toggle-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="closeAdvancedEditModal()">닫기</button>
+          <button class="btn-load" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;" onclick="applyTextEdit()">텍스트 저장</button>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
-  <script src="samples.js"></script>
-  <script src="app.js"></script>
+  <script src="samples.js?v=3"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

@@ -497,214 +497,525 @@ window.deleteSentence = function(idx) {
   showToast('구간을 삭제했습니다. (실행 취소: ⌘Z)');
 };
 
-// In-App Modal Sentence Editing (with undo support)
-let editingSentenceIndex = null;
-
-window.openEditModal = function(idx) {
-  if (!currentLesson || !currentLesson.subtitles[idx]) return;
-  editingSentenceIndex = idx;
-  const s = currentLesson.subtitles[idx];
-  
-  const txtInput = document.getElementById('modal-edit-text');
-  const transInput = document.getElementById('modal-edit-trans');
-  const startInput = document.getElementById('modal-edit-start');
-  const endInput = document.getElementById('modal-edit-end');
-  
-  if (txtInput) txtInput.value = s.text || '';
-  if (transInput) transInput.value = s.translation || '';
-  if (startInput) startInput.value = s.start || 0;
-  if (endInput) endInput.value = s.end || 0;
-  
-  const modal = document.getElementById('edit-sentence-modal');
-  if (modal) {
-    modal.classList.add('active');
-    setTimeout(() => { if (txtInput) txtInput.focus(); }, 50);
-  }
-};
-
-window.closeEditModal = function() {
-  const modal = document.getElementById('edit-sentence-modal');
-  if (modal) modal.classList.remove('active');
-  editingSentenceIndex = null;
-};
-
-window.saveEditedSentence = function() {
-  if (editingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[editingSentenceIndex]) {
-    closeEditModal();
-    return;
-  }
-  
-  const newText = document.getElementById('modal-edit-text').value.trim();
-  const newTrans = document.getElementById('modal-edit-trans').value.trim();
-  const newStart = parseFloat(document.getElementById('modal-edit-start').value) || 0;
-  const newEnd = parseFloat(document.getElementById('modal-edit-end').value) || 0;
-  
-  if (!newText) {
-    alert('원문 대본을 입력해주세요.');
-    return;
-  }
-  
-  pushHistory();
-  
-  const s = currentLesson.subtitles[editingSentenceIndex];
-  s.text = newText;
-  s.translation = newTrans;
-  s.start = Math.max(0, Math.round(newStart * 100) / 100);
-  s.end = Math.max(s.start + 0.5, Math.round(newEnd * 100) / 100);
-  
-  renderTranscriptList();
-  selectSentence(editingSentenceIndex, false);
-  closeEditModal();
-  showToast('✏️ 문장 및 타임스탬프 수정 완료 (실행 취소: ⌘Z)');
-};
+// ===== Shadowingapp_claude 기반 고급 문장 편집 & 다중 분할 시스템 =====
+let editSegIndices = [];
+let editAllWords = [];
+let editSplitPoints = new Set();
+let previewRangeTimer = null;
 
 window.editSentence = function(idx) {
-  openEditModal(idx);
+  openAdvancedEditModal(idx);
 };
 
-// In-App Interactive Word-Click Sentence Splitter (with undo support)
-let splittingSentenceIndex = null;
-let currentSplitWords = [];
+window.openEditModal = function(idx) {
+  openAdvancedEditModal(idx);
+};
 
 window.openSplitModal = function(idx) {
+  openAdvancedEditModal(idx);
+};
+
+window.openAdvancedEditModal = function(idx) {
   if (!currentLesson || !currentLesson.subtitles[idx]) return;
-  splittingSentenceIndex = idx;
-  const s = currentLesson.subtitles[idx];
-  currentSplitWords = s.text.trim().split(/\s+/).filter(Boolean);
+  editSegIndices = [idx];
+  _initAdvancedEditModal();
+};
+
+function _initAdvancedEditModal() {
+  editSplitPoints = new Set();
+  editAllWords = [];
+  let gIdx = 0;
   
-  if (currentSplitWords.length < 2) {
-    showToast('⚠️ 단어가 1개인 문장은 더 이상 나눌 수 없습니다.');
-    return;
-  }
+  editSegIndices.forEach((si, order) => {
+    const sub = currentLesson.subtitles[si];
+    const words = sub.text.trim().split(/\s+/).filter(Boolean);
+    words.forEach((w, wi) => {
+      editAllWords.push({ word: w, segIdx: si, segOrder: order, wordIdx: wi, globalIdx: gIdx });
+      gIdx++;
+    });
+    if (order < editSegIndices.length - 1) editSplitPoints.add(gIdx);
+  });
   
-  const container = document.getElementById('split-words-container');
-  if (container) {
-    container.innerHTML = currentSplitWords.map((w, wIdx) => `
-      <button class="word-split-chip" id="split-chip-${wIdx}" 
-        onmouseenter="previewSplit(${wIdx})" 
-        onmouseleave="resetSplitPreview()" 
-        onclick="executeWordSplit(${wIdx})"
-        title="이 단어('${w}')부터 새 문장으로 분할">
-        <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 2px;">#${wIdx + 1}</span>
-        ${w}
-      </button>
-    `).join('');
-  }
+  const i = editSegIndices[0];
+  const s = currentLesson.subtitles[i];
   
-  resetSplitPreview();
+  const titleEl = document.getElementById('editModalTitle');
+  if (titleEl) titleEl.innerHTML = `<span>✂</span> 문장 편집 & 분할 (${i + 1}번)`;
   
-  const modal = document.getElementById('split-sentence-modal');
+  const textInput = document.getElementById('textEditInput');
+  const transInput = document.getElementById('textEditTransInput');
+  if (textInput) textInput.value = s.text;
+  if (transInput) transInput.value = s.translation;
+  
+  const mergePrevBtn = document.getElementById('mergePrevBtn');
+  const mergeNextBtn = document.getElementById('mergeNextBtn');
+  if (mergePrevBtn) mergePrevBtn.style.display = (i > 0) ? '' : 'none';
+  if (mergeNextBtn) mergeNextBtn.style.display = (i < currentLesson.subtitles.length - 1) ? '' : 'none';
+  
+  renderEditWords();
+  renderEditTimeline();
+  initTimingSection();
+  
+  const modal = document.getElementById('editModalOverlay');
   if (modal) modal.classList.add('active');
-};
+}
 
-window.closeSplitModal = function() {
-  const modal = document.getElementById('split-sentence-modal');
+window.closeAdvancedEditModal = function() {
+  const modal = document.getElementById('editModalOverlay');
   if (modal) modal.classList.remove('active');
-  splittingSentenceIndex = null;
-  currentSplitWords = [];
+  editSegIndices = [];
+  editAllWords = [];
+  editSplitPoints.clear();
+  if (previewRangeTimer) clearInterval(previewRangeTimer);
 };
 
-window.previewSplit = function(wIdx) {
-  if (splittingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[splittingSentenceIndex]) return;
-  const s = currentLesson.subtitles[splittingSentenceIndex];
+function renderEditWords() {
+  const container = document.getElementById('editWords');
+  if (!container) return;
+  container.innerHTML = '';
   
-  const p1Words = currentSplitWords.slice(0, wIdx);
-  const p2Words = currentSplitWords.slice(wIdx);
-  
-  const dur = s.end - s.start;
-  const ratio = wIdx / currentSplitWords.length;
-  const splitSec = Math.round((s.start + (dur * ratio)) * 100) / 100;
-  
-  // Highlight chips
-  currentSplitWords.forEach((_, idx) => {
-    const chip = document.getElementById(`split-chip-${idx}`);
-    if (chip) {
-      chip.classList.toggle('is-part2', idx >= wIdx);
-      chip.classList.toggle('split-pivot', idx === wIdx);
+  let prevSegOrder = -1;
+  editAllWords.forEach((item) => {
+    const gi = item.globalIdx;
+    
+    if (item.segOrder !== prevSegOrder && prevSegOrder !== -1) {
+      const div = document.createElement('span');
+      div.className = 'edit-seg-divider';
+      container.appendChild(div);
     }
+    prevSegOrder = item.segOrder;
+    
+    if (editSplitPoints.has(gi)) {
+      const mark = document.createElement('span');
+      mark.className = 'edit-cut-mark';
+      mark.textContent = '✂';
+      container.appendChild(mark);
+    }
+    
+    const span = document.createElement('span');
+    span.className = 'edit-word' + (editSplitPoints.has(gi) ? ' split-point' : '');
+    span.textContent = item.word;
+    span.title = `클릭하여 이 단어('${item.word}') 앞에서 분할/취소`;
+    
+    span.onclick = () => {
+      if (gi === 0) {
+        showToast('첫 번째 단어는 분할 위치로 선택할 수 없습니다.');
+        return;
+      }
+      if (editSplitPoints.has(gi)) {
+        editSplitPoints.delete(gi);
+      } else {
+        editSplitPoints.add(gi);
+      }
+      renderEditWords();
+      renderEditTimeline();
+    };
+    container.appendChild(span);
   });
   
-  const p1El = document.getElementById('split-preview-part1');
-  const p2El = document.getElementById('split-preview-part2');
+  if (editSplitPoints.size === 0) {
+    const hint = document.createElement('div');
+    hint.style.cssText = 'width:100%;text-align:center;color:rgba(255,255,255,0.3);font-size:0.8rem;padding:6px 0;';
+    hint.textContent = '단어를 클릭해 분할 위치(✂)를 지정하세요.';
+    container.appendChild(hint);
+  }
+}
+
+function renderEditTimeline() {
+  const tl = document.getElementById('editTimeline');
+  if (!tl || editSegIndices.length === 0) return;
+  tl.innerHTML = '';
   
-  if (wIdx === 0) {
-    if (p1El) p1El.innerHTML = `<span style="color:var(--text-muted)">첫 번째 단어 앞에서는 나눌 수 없습니다.</span>`;
-    if (p2El) p2El.innerHTML = `[전체] ${s.text} (${formatTime(s.start)} ~ ${formatTime(s.end)})`;
+  const firstSeg = currentLesson.subtitles[editSegIndices[0]];
+  const lastSeg = currentLesson.subtitles[editSegIndices[editSegIndices.length - 1]];
+  const totalWords = editAllWords.length;
+  const totalDur = lastSeg.end - firstSeg.start;
+  
+  const cuts = [0, ...Array.from(editSplitPoints).sort((a,b)=>a-b), totalWords];
+  cuts.forEach((cut, ci) => {
+    if (ci === cuts.length - 1) return;
+    const startW = cut;
+    const endW = cuts[ci + 1];
+    const startT = Math.round((firstSeg.start + (startW / totalWords) * totalDur) * 100) / 100;
+    const endT = Math.round((firstSeg.start + (endW / totalWords) * totalDur) * 100) / 100;
+    const dur = (endT - startT).toFixed(1);
+    const text = editAllWords.slice(startW, endW).map(w=>w.word).join(' ');
+    
+    const preview = document.createElement('div');
+    preview.style.cssText = `
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px; padding: 6px 12px; cursor: pointer; transition: 0.15s;
+      color: #fff; font-size: 0.85rem;
+    `;
+    preview.onmouseenter = () => {
+      preview.style.borderColor = 'var(--accent-cyan)';
+      preview.style.background = 'rgba(0, 242, 254, 0.15)';
+    };
+    preview.onmouseleave = () => {
+      preview.style.borderColor = 'rgba(255,255,255,0.15)';
+      preview.style.background = 'rgba(255,255,255,0.06)';
+    };
+    preview.innerHTML = `
+      <span style="font-size: 0.9rem; color: var(--accent-cyan);">▶</span>
+      <span style="font-size: 0.78rem; color: var(--text-dim);">${formatTime(startT)}~${formatTime(endT)} (${dur}s)</span>
+      <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${text}</span>
+    `;
+    preview.onclick = () => previewRange(startT, endT);
+    tl.appendChild(preview);
+  });
+}
+
+function previewRange(startT, endT) {
+  if (!player || !isPlayerReady || typeof player.seekTo !== 'function') return;
+  if (previewRangeTimer) clearInterval(previewRangeTimer);
+  
+  isSeekDebouncing = true;
+  player.seekTo(startT, true);
+  setTimeout(() => { isSeekDebouncing = false; }, 250);
+  player.playVideo();
+  
+  showToast(`▶ 구간 미리듣기: ${formatTime(startT)} ~ ${formatTime(endT)}`);
+  
+  previewRangeTimer = setInterval(() => {
+    if (!player || typeof player.getCurrentTime !== 'function') return;
+    const cur = player.getCurrentTime();
+    if (cur >= endT) {
+      player.pauseVideo();
+      clearInterval(previewRangeTimer);
+    }
+  }, 50);
+}
+
+window.previewEditSegment = function() {
+  if (editSegIndices.length === 0) return;
+  const firstSeg = currentLesson.subtitles[editSegIndices[0]];
+  const lastSeg = currentLesson.subtitles[editSegIndices[editSegIndices.length - 1]];
+  previewRange(firstSeg.start, lastSeg.end);
+};
+
+window.applyEditSplit = function() {
+  if (editSplitPoints.size === 0 && editSegIndices.length === 1) {
+    showToast('⚠️ 분할할 단어를 먼저 클릭해 가위(✂) 마커를 지정하세요.');
     return;
   }
   
-  if (p1El) p1El.innerHTML = `[문장 1] <strong>${p1Words.join(' ')}</strong> <span style="font-size:0.75rem; opacity:0.8;">(${formatTime(s.start)} ~ ${formatTime(splitSec)})</span>`;
-  if (p2El) p2El.innerHTML = `[문장 2] <strong>${p2Words.join(' ')}</strong> <span style="font-size:0.75rem; opacity:0.8;">(${formatTime(splitSec)} ~ ${formatTime(s.end)})</span>`;
-};
-
-window.resetSplitPreview = function() {
-  currentSplitWords.forEach((_, idx) => {
-    const chip = document.getElementById(`split-chip-${idx}`);
-    if (chip) {
-      chip.classList.remove('is-part2');
-      chip.classList.remove('split-pivot');
-    }
+  const cuts = Array.from(editSplitPoints).sort((a,b)=>a-b);
+  const groups = [];
+  let prev = 0;
+  cuts.forEach(c => {
+    groups.push(editAllWords.slice(prev, c));
+    prev = c;
   });
+  groups.push(editAllWords.slice(prev));
   
-  const p1El = document.getElementById('split-preview-part1');
-  const p2El = document.getElementById('split-preview-part2');
-  if (p1El) p1El.innerHTML = `<span style="color:var(--text-muted)">💡 나누고 싶은 <strong>시작 단어</strong> 위에 마우스를 올려보세요</span>`;
-  if (p2El) p2El.innerHTML = `클릭하면 해당 단어부터 즉시 새로운 문장으로 분할됩니다.`;
-};
-
-window.executeWordSplit = function(wIdx) {
-  if (wIdx <= 0) {
-    showToast('⚠️ 첫 번째 단어부터는 나눌 수 없습니다. 두 번째 단어 이후를 선택해주세요.');
+  const validGroups = groups.filter(g => g.length > 0);
+  if (validGroups.length < 2) {
+    showToast('⚠️ 분할 위치를 1개 이상 지정해주세요.');
     return;
   }
-  if (splittingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[splittingSentenceIndex]) return;
   
-  const s = currentLesson.subtitles[splittingSentenceIndex];
-  const p1Words = currentSplitWords.slice(0, wIdx);
-  const p2Words = currentSplitWords.slice(wIdx);
-  
-  const dur = s.end - s.start;
-  const ratio = wIdx / currentSplitWords.length;
-  const splitSec = Math.round((s.start + (dur * ratio)) * 100) / 100;
+  const firstSeg = currentLesson.subtitles[editSegIndices[0]];
+  const lastSeg = currentLesson.subtitles[editSegIndices[editSegIndices.length - 1]];
+  const totalWords = editAllWords.length;
+  const totalDur = lastSeg.end - firstSeg.start;
   
   pushHistory();
   
-  let p1Text = p1Words.join(' ').trim();
-  p1Text = p1Text.charAt(0).toUpperCase() + p1Text.slice(1);
-  if (!/[.?!]$/.test(p1Text)) p1Text += '.';
-  
-  let p2Text = p2Words.join(' ').trim();
-  p2Text = p2Text.charAt(0).toUpperCase() + p2Text.slice(1);
-  if (!/[.?!]$/.test(p2Text)) p2Text += '.';
-  
-  const s1 = {
-    id: s.id,
-    start: s.start,
-    end: splitSec,
-    text: p1Text,
-    translation: s.translation
-  };
-  
-  const s2 = {
-    id: s.id + 1,
-    start: splitSec,
-    end: s.end,
-    text: p2Text,
-    translation: "(분할된 문장)"
-  };
-  
-  currentLesson.subtitles.splice(splittingSentenceIndex, 1, s1, s2);
-  
-  // Re-index all subtitles
-  currentLesson.subtitles.forEach((sub, i) => {
-    sub.id = i + 1;
+  const newSegs = validGroups.map((grp, gi) => {
+    const startWord = grp[0].globalIdx;
+    const endWord = grp[grp.length - 1].globalIdx;
+    let t = grp.map(w => w.word).join(' ').trim();
+    t = t.charAt(0).toUpperCase() + t.slice(1);
+    if (!/[.?!]$/.test(t)) t += '.';
+    
+    return {
+      id: 0,
+      start: Math.round((firstSeg.start + (startWord / totalWords) * totalDur) * 100) / 100,
+      end: Math.round((firstSeg.start + ((endWord + 1) / totalWords) * totalDur) * 100) / 100,
+      text: t,
+      translation: gi === 0 ? firstSeg.translation : "(분할된 문장)"
+    };
   });
+  newSegs[newSegs.length - 1].end = lastSeg.end;
+  
+  const minIdx = editSegIndices[0];
+  const deleteCount = editSegIndices.length;
+  currentLesson.subtitles.splice(minIdx, deleteCount, ...newSegs);
+  
+  currentLesson.subtitles.forEach((s, idx) => { s.id = idx + 1; });
   
   renderTranscriptList();
-  selectSentence(splittingSentenceIndex, true);
-  closeSplitModal();
-  showToast(`✂️ 문장을 둘로 나누었습니다: '${p2Words[0]}' 부터 분할 (실행 취소: ⌘Z)`);
+  selectSentence(minIdx, true);
+  closeAdvancedEditModal();
+  showToast(`✂️ ${validGroups.length}개 문장으로 분할 완료! (실행 취소: ⌘Z)`);
 };
+
+window.applyEditMergeNext = function() {
+  if (editSegIndices.length === 0) return;
+  const i = editSegIndices[0];
+  if (i >= currentLesson.subtitles.length - 1) {
+    showToast('다음 문장이 없습니다.');
+    return;
+  }
+  
+  pushHistory();
+  const cur = currentLesson.subtitles[i];
+  const next = currentLesson.subtitles[i + 1];
+  
+  cur.text = `${cur.text} ${next.text}`;
+  cur.end = next.end;
+  currentLesson.subtitles.splice(i + 1, 1);
+  currentLesson.subtitles.forEach((s, idx) => { s.id = idx + 1; });
+  
+  renderTranscriptList();
+  selectSentence(i, true);
+  closeAdvancedEditModal();
+  showToast('다음 문장과 합쳤습니다. (실행 취소: ⌘Z)');
+};
+
+window.applyEditMergePrev = function() {
+  if (editSegIndices.length === 0) return;
+  const i = editSegIndices[0];
+  if (i <= 0) {
+    showToast('이전 문장이 없습니다.');
+    return;
+  }
+  
+  pushHistory();
+  const prev = currentLesson.subtitles[i - 1];
+  const cur = currentLesson.subtitles[i];
+  
+  prev.text = `${prev.text} ${cur.text}`;
+  prev.end = cur.end;
+  currentLesson.subtitles.splice(i, 1);
+  currentLesson.subtitles.forEach((s, idx) => { s.id = idx + 1; });
+  
+  renderTranscriptList();
+  selectSentence(i - 1, true);
+  closeAdvancedEditModal();
+  showToast('이전 문장과 합쳤습니다. (실행 취소: ⌘Z)');
+};
+
+window.applyTextEdit = function() {
+  if (editSegIndices.length === 0) return;
+  const val = document.getElementById('textEditInput')?.value.trim();
+  const transVal = document.getElementById('textEditTransInput')?.value.trim();
+  if (!val) {
+    showToast('원문 텍스트를 입력해주세요.');
+    return;
+  }
+  
+  pushHistory();
+  const i = editSegIndices[0];
+  currentLesson.subtitles[i].text = val;
+  if (transVal) currentLesson.subtitles[i].translation = transVal;
+  
+  renderTranscriptList();
+  selectSentence(i, false);
+  closeAdvancedEditModal();
+  showToast('✏️ 텍스트 저장 완료 (실행 취소: ⌘Z)');
+};
+
+// ===== Shadowingapp_claude 타이밍 미세 조정 엔진 =====
+let timingOrigStart = 0;
+let timingOrigEnd = 0;
+let timingBarMin = 0;
+let timingBarMax = 0;
+let _timingDragging = null;
+let timingPlayheadTimer = null;
+
+function initTimingSection() {
+  const isSingle = editSegIndices.length === 1;
+  const section = document.getElementById('timingSection');
+  if (section) section.style.display = isSingle ? '' : 'none';
+  if (!isSingle) return;
+  
+  const seg = currentLesson.subtitles[editSegIndices[0]];
+  timingOrigStart = seg.start;
+  timingOrigEnd = seg.end;
+  
+  // Bar range: 10s buffer before and after
+  const duration = (player && typeof player.getDuration === 'function') ? player.getDuration() : seg.end + 30;
+  timingBarMin = Math.max(0, Math.round((seg.start - 8) * 10) / 10);
+  timingBarMax = Math.min(duration || seg.end + 20, Math.round((seg.end + 8) * 10) / 10);
+  
+  document.getElementById('timingStartInput').value = seg.start.toFixed(2);
+  document.getElementById('timingEndInput').value = seg.end.toFixed(2);
+  document.getElementById('timingStartDisplay').textContent = seg.start.toFixed(2) + 's';
+  document.getElementById('timingEndDisplay').textContent = seg.end.toFixed(2) + 's';
+  document.getElementById('timingLabelLeft').textContent = formatTime(timingBarMin);
+  document.getElementById('timingLabelRight').textContent = formatTime(timingBarMax);
+  document.getElementById('timingLabelMid').textContent = `${(seg.end - seg.start).toFixed(1)}s 길이`;
+  
+  updateTimingBar();
+  _attachTimingHandlers();
+  startTimingBarPlayhead();
+}
+
+function updateTimingBar() {
+  const s = parseFloat(document.getElementById('timingStartInput')?.value) || 0;
+  const e = parseFloat(document.getElementById('timingEndInput')?.value) || 0;
+  const span = Math.max(0.1, timingBarMax - timingBarMin);
+  
+  const lp = Math.max(0, Math.min(100, ((s - timingBarMin) / span) * 100));
+  const rp = Math.max(0, Math.min(100, ((e - timingBarMin) / span) * 100));
+  
+  const rangeEl = document.getElementById('timingBarRange');
+  const hStart = document.getElementById('timingHandleStart');
+  const hEnd = document.getElementById('timingHandleEnd');
+  const midLabel = document.getElementById('timingLabelMid');
+  
+  if (rangeEl) {
+    rangeEl.style.left = lp + '%';
+    rangeEl.style.width = Math.max(1, rp - lp) + '%';
+  }
+  if (hStart) hStart.style.left = lp + '%';
+  if (hEnd) hEnd.style.left = rp + '%';
+  if (midLabel) midLabel.textContent = `${Math.max(0, e - s).toFixed(1)}s 구간`;
+}
+
+window.setTimingFromVideo = function(which) {
+  if (!player || typeof player.getCurrentTime !== 'function') return;
+  const t = Math.round(player.getCurrentTime() * 100) / 100;
+  
+  if (which === 'start') {
+    document.getElementById('timingStartInput').value = t.toFixed(2);
+    document.getElementById('timingStartDisplay').textContent = t.toFixed(2) + 's';
+  } else {
+    document.getElementById('timingEndInput').value = t.toFixed(2);
+    document.getElementById('timingEndDisplay').textContent = t.toFixed(2) + 's';
+  }
+  
+  updateTimingBar();
+  previewCurrentTiming();
+};
+
+window.nudgeTiming = function(which, delta) {
+  const id = which === 'start' ? 'timingStartInput' : 'timingEndInput';
+  const dispId = which === 'start' ? 'timingStartDisplay' : 'timingEndDisplay';
+  const cur = parseFloat(document.getElementById(id)?.value) || 0;
+  const val = Math.max(0, Math.round((cur + delta) * 100) / 100);
+  
+  const inputEl = document.getElementById(id);
+  const dispEl = document.getElementById(dispId);
+  if (inputEl) inputEl.value = val.toFixed(2);
+  if (dispEl) dispEl.textContent = val.toFixed(2) + 's';
+  
+  updateTimingBar();
+  previewCurrentTiming();
+};
+
+window.previewCurrentTiming = function() {
+  const s = parseFloat(document.getElementById('timingStartInput')?.value) || 0;
+  const e = parseFloat(document.getElementById('timingEndInput')?.value) || 0;
+  if (e > s) {
+    previewRange(s, e);
+  }
+};
+
+window.applyTimingEdit = function() {
+  if (editSegIndices.length === 0) return;
+  const i = editSegIndices[0];
+  const s = parseFloat(document.getElementById('timingStartInput')?.value);
+  const e = parseFloat(document.getElementById('timingEndInput')?.value);
+  
+  if (isNaN(s) || isNaN(e) || e <= s) {
+    showToast('⚠️ 시작 시간이 종료 시간보다 빨라야 합니다.');
+    return;
+  }
+  
+  pushHistory();
+  currentLesson.subtitles[i].start = s;
+  currentLesson.subtitles[i].end = e;
+  
+  renderTranscriptList();
+  selectSentence(i, false);
+  showToast(`⏱️ 타이밍 미세 조정 저장 완료: ${formatTime(s)} ~ ${formatTime(e)} (실행 취소: ⌘Z)`);
+};
+
+window.resetTimingEdit = function() {
+  document.getElementById('timingStartInput').value = timingOrigStart.toFixed(2);
+  document.getElementById('timingEndInput').value = timingOrigEnd.toFixed(2);
+  document.getElementById('timingStartDisplay').textContent = timingOrigStart.toFixed(2) + 's';
+  document.getElementById('timingEndDisplay').textContent = timingOrigEnd.toFixed(2) + 's';
+  updateTimingBar();
+};
+
+function _attachTimingHandlers() {
+  const hs = document.getElementById('timingHandleStart');
+  const he = document.getElementById('timingHandleEnd');
+  const bar = document.getElementById('timingBarWrap');
+  if (!hs || !he || !bar) return;
+  
+  const hsClone = hs.cloneNode(true);
+  const heClone = he.cloneNode(true);
+  hs.parentNode.replaceChild(hsClone, hs);
+  he.parentNode.replaceChild(heClone, he);
+  
+  hsClone.addEventListener('mousedown', e => _timingOnDown(e, 'start'));
+  heClone.addEventListener('mousedown', e => _timingOnDown(e, 'end'));
+  hsClone.addEventListener('touchstart', e => _timingOnDown(e, 'start'), { passive: false });
+  heClone.addEventListener('touchstart', e => _timingOnDown(e, 'end'), { passive: false });
+}
+
+function _timingOnDown(e, which) {
+  e.preventDefault();
+  e.stopPropagation();
+  _timingDragging = which;
+  document.addEventListener('mousemove', _timingOnMove);
+  document.addEventListener('mouseup', _timingOnUp);
+  document.addEventListener('touchmove', _timingOnMove, { passive: false });
+  document.addEventListener('touchend', _timingOnUp);
+}
+
+function _timingOnMove(e) {
+  if (!_timingDragging) return;
+  e.preventDefault();
+  const bar = document.getElementById('timingBarWrap');
+  if (!bar) return;
+  
+  const rect = bar.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const pct = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+  const t = Math.round((timingBarMin + pct * (timingBarMax - timingBarMin)) * 100) / 100;
+  
+  const id = _timingDragging === 'start' ? 'timingStartInput' : 'timingEndInput';
+  const dispId = _timingDragging === 'start' ? 'timingStartDisplay' : 'timingEndDisplay';
+  
+  document.getElementById(id).value = t.toFixed(2);
+  document.getElementById(dispId).textContent = t.toFixed(2) + 's';
+  updateTimingBar();
+}
+
+function _timingOnUp() {
+  if (_timingDragging) {
+    _timingDragging = null;
+    document.removeEventListener('mousemove', _timingOnMove);
+    document.removeEventListener('mouseup', _timingOnUp);
+    document.removeEventListener('touchmove', _timingOnMove);
+    document.removeEventListener('touchend', _timingOnUp);
+    previewCurrentTiming();
+  }
+}
+
+function startTimingBarPlayhead() {
+  if (timingPlayheadTimer) clearInterval(timingPlayheadTimer);
+  const posEl = document.getElementById('timingPlayPos');
+  if (!posEl) return;
+  
+  timingPlayheadTimer = setInterval(() => {
+    const modal = document.getElementById('editModalOverlay');
+    if (!modal || !modal.classList.contains('active') || !player || typeof player.getCurrentTime !== 'function') {
+      clearInterval(timingPlayheadTimer);
+      return;
+    }
+    const cur = player.getCurrentTime();
+    const span = Math.max(0.1, timingBarMax - timingBarMin);
+    const pct = Math.max(0, Math.min(100, ((cur - timingBarMin) / span) * 100));
+    posEl.style.left = pct + '%';
+  }, 60);
+}
 
 // Add Current Time as New Sentence Checkpoint (with undo support)
 window.addCurrentTimeAsSentence = function() {
@@ -1198,6 +1509,18 @@ function initEventListeners() {
       case 'KeyA':
         e.preventDefault();
         addCurrentTimeAsSentence();
+        break;
+      case 'KeyI':
+        if (document.getElementById('editModalOverlay')?.classList.contains('active')) {
+          e.preventDefault();
+          setTimingFromVideo('start');
+        }
+        break;
+      case 'KeyO':
+        if (document.getElementById('editModalOverlay')?.classList.contains('active')) {
+          e.preventDefault();
+          setTimingFromVideo('end');
+        }
         break;
     }
   });

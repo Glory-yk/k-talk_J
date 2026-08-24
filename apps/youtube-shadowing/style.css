@@ -907,43 +907,238 @@ body {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
 }
 
-/* Word Split Interactive Chips */
-.word-split-chip {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+/* Edit Modal & Multi-Cut Elements (from Shadowingapp_claude) */
+.edit-words {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  min-height: 55px !important;
+  padding: 14px !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-glass) !important;
+  align-items: center !important;
 }
 
-.word-split-chip:hover {
-  background: rgba(99, 102, 241, 0.35);
-  border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+.edit-word {
+  padding: 6px 12px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+  font-size: 0.95rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.edit-word:hover {
+  background: rgba(0, 242, 254, 0.25) !important;
+  border-color: var(--accent-cyan) !important;
+  color: var(--accent-cyan) !important;
+  transform: translateY(-2px) !important;
+}
+
+.edit-word.split-point {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border: 1.5px dashed var(--accent-red) !important;
+  color: #fca5a5 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+.edit-cut-mark {
+  font-size: 0.75rem !important;
+  color: #fca5a5 !important;
+  padding: 2px 6px !important;
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-radius: 4px !important;
+  user-select: none !important;
+  margin: 0 2px !important;
+}
+
+.edit-seg-divider {
+  width: 2px !important;
+  height: 28px !important;
+  background: rgba(139, 92, 246, 0.6) !important;
+  border-radius: 2px !important;
+  margin: 0 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.edit-btn {
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.edit-btn.primary {
+  background: linear-gradient(135deg, #00f2fe, #4facfe) !important;
+  color: #0f172a !important;
+}
+
+.edit-btn.primary:hover {
+  box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.edit-btn.secondary {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.edit-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.edit-btn.danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #fca5a5 !important;
+}
+
+/* Timing Fine-Tuning Section (from Shadowingapp_claude) */
+.timing-section {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-glass);
+}
+
+.timing-bar-wrap {
+  position: relative;
+  width: 100%;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  border: 1px solid var(--border-glass);
+  margin: 6px 0 10px;
+  cursor: pointer;
+}
+
+.timing-bar-range {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 242, 254, 0.35), rgba(99, 102, 241, 0.35));
+  border-radius: 8px;
+  border: 1px solid var(--accent-cyan);
+}
+
+.timing-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 26px;
+  background: #00f2fe;
+  border-radius: 4px;
+  cursor: ew-resize;
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(0, 242, 254, 0.6);
+}
+
+.timing-handle.end-handle {
+  background: #6366f1;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.6);
+}
+
+.timing-play-pos {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #ffeb3b;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.timing-time-labels {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.timing-mark-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.timing-mark-btn.start {
+  border: 1.5px solid var(--accent-cyan);
+  background: rgba(0, 242, 254, 0.08);
+  color: var(--accent-cyan);
+}
+
+.timing-mark-btn.start:hover {
+  background: rgba(0, 242, 254, 0.2);
+}
+
+.timing-mark-btn.end {
+  border: 1.5px solid #818cf8;
+  background: rgba(99, 102, 241, 0.1);
   color: #a5b4fc;
 }
 
-.word-split-chip.is-part2 {
-  background: rgba(245, 158, 11, 0.18);
-  border-color: rgba(245, 158, 11, 0.5);
-  color: #fcd34d;
+.timing-mark-btn.end:hover {
+  background: rgba(99, 102, 241, 0.22);
 }
 
-.word-split-chip.split-pivot {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-  border-color: #c7d2fe !important;
-  color: #ffffff !important;
-  font-weight: 700 !important;
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.6) !important;
+.timing-val-display {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
 }
+
+.timing-set-btn {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.timing-set-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.timing-set-btn.preview {
+  background: rgba(255, 235, 59, 0.12);
+  border-color: rgba(255, 235, 59, 0.4);
+  color: #ffeb3b;
+}
+
+.timing-set-btn.preview:hover {
+  background: rgba(255, 235, 59, 0.25);
+}
+
+
 
 
