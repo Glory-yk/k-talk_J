@@ -1,0 +1,1 @@
+<find>— 이전</find><replace>— 2026-08-24 오전 12:00 업데이트</replace>
