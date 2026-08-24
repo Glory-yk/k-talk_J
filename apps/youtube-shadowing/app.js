@@ -433,6 +433,7 @@ function renderTranscriptList() {
           <button class="time-adjust-btn" title="시작 시간 0.5초 미루기" onclick="event.stopPropagation(); adjustStartTime(${idx}, 0.5)">+0.5s</button>
         </span>
         <div class="item-actions">
+          <button class="item-btn" title="이 문장 단어별로 나누기" onclick="event.stopPropagation(); openSplitModal(${idx})">✂️</button>
           <button class="item-btn" title="아래 문장과 합치기" onclick="event.stopPropagation(); mergeWithNext(${idx})">🔗</button>
           <button class="item-btn" title="이 문장 수정" onclick="event.stopPropagation(); editSentence(${idx})">✏️</button>
           <button class="item-btn" title="이 구간 삭제" onclick="event.stopPropagation(); deleteSentence(${idx})">🗑️</button>
@@ -559,6 +560,150 @@ window.saveEditedSentence = function() {
 
 window.editSentence = function(idx) {
   openEditModal(idx);
+};
+
+// In-App Interactive Word-Click Sentence Splitter (with undo support)
+let splittingSentenceIndex = null;
+let currentSplitWords = [];
+
+window.openSplitModal = function(idx) {
+  if (!currentLesson || !currentLesson.subtitles[idx]) return;
+  splittingSentenceIndex = idx;
+  const s = currentLesson.subtitles[idx];
+  currentSplitWords = s.text.trim().split(/\s+/).filter(Boolean);
+  
+  if (currentSplitWords.length < 2) {
+    showToast('⚠️ 단어가 1개인 문장은 더 이상 나눌 수 없습니다.');
+    return;
+  }
+  
+  const container = document.getElementById('split-words-container');
+  if (container) {
+    container.innerHTML = currentSplitWords.map((w, wIdx) => `
+      <button class="word-split-chip" id="split-chip-${wIdx}" 
+        onmouseenter="previewSplit(${wIdx})" 
+        onmouseleave="resetSplitPreview()" 
+        onclick="executeWordSplit(${wIdx})"
+        title="이 단어('${w}')부터 새 문장으로 분할">
+        <span style="font-size: 0.75rem; color: var(--text-dim); margin-right: 2px;">#${wIdx + 1}</span>
+        ${w}
+      </button>
+    `).join('');
+  }
+  
+  resetSplitPreview();
+  
+  const modal = document.getElementById('split-sentence-modal');
+  if (modal) modal.classList.add('active');
+};
+
+window.closeSplitModal = function() {
+  const modal = document.getElementById('split-sentence-modal');
+  if (modal) modal.classList.remove('active');
+  splittingSentenceIndex = null;
+  currentSplitWords = [];
+};
+
+window.previewSplit = function(wIdx) {
+  if (splittingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[splittingSentenceIndex]) return;
+  const s = currentLesson.subtitles[splittingSentenceIndex];
+  
+  const p1Words = currentSplitWords.slice(0, wIdx);
+  const p2Words = currentSplitWords.slice(wIdx);
+  
+  const dur = s.end - s.start;
+  const ratio = wIdx / currentSplitWords.length;
+  const splitSec = Math.round((s.start + (dur * ratio)) * 100) / 100;
+  
+  // Highlight chips
+  currentSplitWords.forEach((_, idx) => {
+    const chip = document.getElementById(`split-chip-${idx}`);
+    if (chip) {
+      chip.classList.toggle('is-part2', idx >= wIdx);
+      chip.classList.toggle('split-pivot', idx === wIdx);
+    }
+  });
+  
+  const p1El = document.getElementById('split-preview-part1');
+  const p2El = document.getElementById('split-preview-part2');
+  
+  if (wIdx === 0) {
+    if (p1El) p1El.innerHTML = `<span style="color:var(--text-muted)">첫 번째 단어 앞에서는 나눌 수 없습니다.</span>`;
+    if (p2El) p2El.innerHTML = `[전체] ${s.text} (${formatTime(s.start)} ~ ${formatTime(s.end)})`;
+    return;
+  }
+  
+  if (p1El) p1El.innerHTML = `[문장 1] <strong>${p1Words.join(' ')}</strong> <span style="font-size:0.75rem; opacity:0.8;">(${formatTime(s.start)} ~ ${formatTime(splitSec)})</span>`;
+  if (p2El) p2El.innerHTML = `[문장 2] <strong>${p2Words.join(' ')}</strong> <span style="font-size:0.75rem; opacity:0.8;">(${formatTime(splitSec)} ~ ${formatTime(s.end)})</span>`;
+};
+
+window.resetSplitPreview = function() {
+  currentSplitWords.forEach((_, idx) => {
+    const chip = document.getElementById(`split-chip-${idx}`);
+    if (chip) {
+      chip.classList.remove('is-part2');
+      chip.classList.remove('split-pivot');
+    }
+  });
+  
+  const p1El = document.getElementById('split-preview-part1');
+  const p2El = document.getElementById('split-preview-part2');
+  if (p1El) p1El.innerHTML = `<span style="color:var(--text-muted)">💡 나누고 싶은 <strong>시작 단어</strong> 위에 마우스를 올려보세요</span>`;
+  if (p2El) p2El.innerHTML = `클릭하면 해당 단어부터 즉시 새로운 문장으로 분할됩니다.`;
+};
+
+window.executeWordSplit = function(wIdx) {
+  if (wIdx <= 0) {
+    showToast('⚠️ 첫 번째 단어부터는 나눌 수 없습니다. 두 번째 단어 이후를 선택해주세요.');
+    return;
+  }
+  if (splittingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[splittingSentenceIndex]) return;
+  
+  const s = currentLesson.subtitles[splittingSentenceIndex];
+  const p1Words = currentSplitWords.slice(0, wIdx);
+  const p2Words = currentSplitWords.slice(wIdx);
+  
+  const dur = s.end - s.start;
+  const ratio = wIdx / currentSplitWords.length;
+  const splitSec = Math.round((s.start + (dur * ratio)) * 100) / 100;
+  
+  pushHistory();
+  
+  let p1Text = p1Words.join(' ').trim();
+  p1Text = p1Text.charAt(0).toUpperCase() + p1Text.slice(1);
+  if (!/[.?!]$/.test(p1Text)) p1Text += '.';
+  
+  let p2Text = p2Words.join(' ').trim();
+  p2Text = p2Text.charAt(0).toUpperCase() + p2Text.slice(1);
+  if (!/[.?!]$/.test(p2Text)) p2Text += '.';
+  
+  const s1 = {
+    id: s.id,
+    start: s.start,
+    end: splitSec,
+    text: p1Text,
+    translation: s.translation
+  };
+  
+  const s2 = {
+    id: s.id + 1,
+    start: splitSec,
+    end: s.end,
+    text: p2Text,
+    translation: "(분할된 문장)"
+  };
+  
+  currentLesson.subtitles.splice(splittingSentenceIndex, 1, s1, s2);
+  
+  // Re-index all subtitles
+  currentLesson.subtitles.forEach((sub, i) => {
+    sub.id = i + 1;
+  });
+  
+  renderTranscriptList();
+  selectSentence(splittingSentenceIndex, true);
+  closeSplitModal();
+  showToast(`✂️ 문장을 둘로 나누었습니다: '${p2Words[0]}' 부터 분할 (실행 취소: ⌘Z)`);
 };
 
 // Add Current Time as New Sentence Checkpoint (with undo support)

@@ -349,6 +349,39 @@
     </div>
   </div>
 
+  <!-- Split Sentence In-App Modal -->
+  <div id="split-sentence-modal" class="app-modal">
+    <div class="modal-backdrop" onclick="closeSplitModal()"></div>
+    <div class="modal-card" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+          <span>✂️</span> 단어 클릭 문장 나누기
+        </h3>
+        <button class="modal-close-btn" onclick="closeSplitModal()">✕</button>
+      </div>
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 1.25rem; padding: 1.25rem 0;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+          💡 <strong>새 문장을 시작할 단어</strong>를 클릭하세요. 해당 단어부터 자동으로 다음 문장으로 분할됩니다.
+        </p>
+
+        <!-- Clickable Words Container -->
+        <div id="split-words-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; background: rgba(0, 0, 0, 0.4); border-radius: 12px; border: 1px solid var(--border-glass); min-height: 80px; align-items: center;">
+          <!-- Injected dynamically via JS -->
+        </div>
+
+        <!-- Live Split Preview Box -->
+        <div id="split-preview-box" style="display: flex; flex-direction: column; gap: 0.5rem; background: rgba(99, 102, 241, 0.08); border: 1px dashed var(--accent-primary); border-radius: 10px; padding: 0.85rem; font-size: 0.85rem;">
+          <div style="color: var(--text-muted); font-size: 0.8rem;">분할 미리보기:</div>
+          <div id="split-preview-part1" style="color: var(--accent-cyan); font-weight: 600;">[문장 1] 단어를 마우스로 올려보세요</div>
+          <div id="split-preview-part2" style="color: var(--accent-amber); font-weight: 600;">[문장 2] ...</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid var(--border-glass); padding-top: 1rem;">
+        <button class="toggle-btn" style="padding: 0.6rem 1.2rem; font-size: 0.85rem;" onclick="closeSplitModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="samples.js"></script>
   <script src="app.js"></script>

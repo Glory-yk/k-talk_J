@@ -907,3 +907,43 @@ body {
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
 }
 
+/* Word Split Interactive Chips */
+.word-split-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.word-split-chip:hover {
+  background: rgba(99, 102, 241, 0.35);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+}
+
+.word-split-chip.is-part2 {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fcd34d;
+}
+
+.word-split-chip.split-pivot {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+  border-color: #c7d2fe !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.6) !important;
+}
+
+

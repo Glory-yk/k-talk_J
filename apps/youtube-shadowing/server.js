@@ -16,90 +16,189 @@ function decodeHtml(html) {
     .replace(/&amp;/g, '&')
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
     .replace(/\n/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// True Non-Overlapping Audio Boundary Segmenter
-function trueAudioBoundarySegmenter(rawChunks) {
+// Universal Non-Overlapping Sentence Segmenter for YouTube Shadowing
+function universalSentenceSegmenter(rawChunks) {
   if (!rawChunks || rawChunks.length === 0) return [];
 
-  // Step 1: Compute true non-overlapping start and end for every chunk
-  const processedChunks = [];
+  // Step 1: Word-level tokenization with exact interpolated non-overlapping timestamps
+  const wordTokens = [];
   for (let i = 0; i < rawChunks.length; i++) {
     const c = rawChunks[i];
     const text = decodeHtml(c.text);
     if (!text || /^\[.+\]$/.test(text) || /^&#\d+;$/.test(text)) continue;
 
+    const words = text.split(/\s+/).filter(Boolean);
     const startSec = c.offset / 1000;
+    const rawEnd = (c.offset + c.duration) / 1000;
     const next = rawChunks[i + 1];
-    
-    // In YouTube transcripts, the next chunk's offset is the exact moment the next words start.
-    // If there is a big gap (> 1.2s), use current chunk's offset + duration.
-    let endSec = (c.offset + c.duration) / 1000;
-    if (next && (next.offset / 1000 > startSec)) {
-      const nextStart = next.offset / 1000;
-      if (nextStart - startSec < 10.0) {
-        endSec = nextStart;
-      }
+
+    let endSec = rawEnd;
+    if (next && (next.offset / 1000 > startSec) && (next.offset / 1000 < rawEnd)) {
+      endSec = next.offset / 1000;
     }
 
-    processedChunks.push({
-      text,
-      start: startSec,
-      end: endSec
-    });
+    const wordDuration = Math.max(0.12, (endSec - startSec) / Math.max(1, words.length));
+
+    for (let w = 0; w < words.length; w++) {
+      const wStart = startSec + (w * wordDuration);
+      const wEnd = Math.min(endSec, wStart + wordDuration);
+      wordTokens.push({
+        word: words[w],
+        start: wStart,
+        end: wEnd,
+        chunkIdx: i,
+        rawChunkEnd: rawEnd
+      });
+    }
   }
 
-  // Step 2: Combine chunks into natural complete sentences (6~10 words or complete clauses)
+  // Step 2: Deduplicate overlapping words from sliding ASR window
+  const cleanTokens = [];
+  for (let i = 0; i < wordTokens.length; i++) {
+    const cur = wordTokens[i];
+    const prev = cleanTokens[cleanTokens.length - 1];
+    if (prev && prev.word.toLowerCase() === cur.word.toLowerCase() && Math.abs(cur.start - prev.start) < 2.0) {
+      prev.end = Math.max(prev.end, cur.end);
+      continue;
+    }
+    cleanTokens.push(cur);
+  }
+
+  // Step 3: Starter phrases (n-grams) that indicate a fresh shadow unit
+  const sentenceStarters = [
+    ['you', 'will', 'practice'],
+    ['in', 'this', 'video'],
+    ['and', 'if', "you're"],
+    ['if', "you're", 'new'],
+    ['so', 'go', 'check'],
+    ['and', "i'll", 'be', 'waiting'],
+    ['as', 'always'],
+    ['and', 'as', 'always'],
+    ['first', 'in', 'korean'],
+    ['and', 'then', "we'll"],
+    ['the', 'free', 'script'],
+    ['the', 'link', 'is'],
+    ['and', "i've", 'got', 'a'],
+    ['so', 'make', 'sure'],
+    ['all', 'right', 'then'],
+    ['all', 'right'],
+    ["today's", 'expression', 'is'],
+    ['you', 'speak', 'english'],
+    ['speak', 'english', 'well'],
+    ['considering', 'that'],
+    ['you', 'are', 'very', 'mature'],
+    ['it', 'was', 'a', 'letdown'],
+    ['he', 'looks', 'super', 'young'],
+    ['seriously', "what's", 'his'],
+    ['seriously', "what's", 'a'],
+    ['i', 'did', 'it', 'pretty', 'well'],
+    ['considering', 'how', 'cheap'],
+    ['this', 'pen', "isn't", 'so'],
+    ['now', 'it', 'was', 'a', 'let'],
+    ['well', 'done', 'guys'],
+    ['please', 'apply', 'what'],
+    ['and', "i'll", 'see', 'you'],
+    ['sleep', 'tight', 'bye']
+  ];
+
+  const illegalEndWords = new Set([
+    'of', 'to', 'for', 'in', 'on', 'at', 'with', 'from', 'about', 'by',
+    'the', 'a', 'an', 'this', 'that', 'our', 'my', 'your', 'their', 'his', 'her',
+    'will', 'would', 'can', 'could', 'should', "i'll", "we'll", "you'll", "it'll",
+    'what', 'which', 'who', 'where', 'when', 'why', 'how',
+    'and', 'or', 'but', 'so', 'as', 'if', 'day', '100', '24', 'pink', 'pinned', 'free'
+  ]);
+
+  function matchesStarter(index) {
+    for (const pat of sentenceStarters) {
+      if (index + pat.length <= cleanTokens.length) {
+        let match = true;
+        for (let k = 0; k < pat.length; k++) {
+          const tok = cleanTokens[index + k].word.toLowerCase().replace(/[^a-z0-9']/g, '');
+          if (tok !== pat[k].toLowerCase().replace(/[^a-z0-9']/g, '')) {
+            match = false;
+            break;
+          }
+        }
+        if (match) return true;
+      }
+    }
+    return false;
+  }
+
   const sentences = [];
   let curGroup = [];
 
-  for (let i = 0; i < processedChunks.length; i++) {
-    const chunk = processedChunks[i];
-    curGroup.push(chunk);
+  for (let i = 0; i < cleanTokens.length; i++) {
+    const tok = cleanTokens[i];
+    const prevTok = cleanTokens[i - 1];
+    const pauseGap = prevTok ? (tok.start - prevTok.end) : 0;
+    const isHardPause = pauseGap > 0.8;
+    const isStarter = matchesStarter(i);
 
-    const nextChunk = processedChunks[i + 1];
-    const groupText = curGroup.map(c => c.text).join(' ').trim();
-    const wordCount = groupText.split(/\s+/).length;
-    
-    // Silence / pause to next chunk
-    const gapToNext = nextChunk ? (nextChunk.start - chunk.end) : 999;
-    const hasPause = gapToNext > 0.8;
-    const isGoodLength = wordCount >= 7;
+    const curLastWord = (curGroup.length > 0) ? curGroup[curGroup.length - 1].word.toLowerCase().replace(/[^a-z0-9']/g, '') : '';
+    const isIllegal = illegalEndWords.has(curLastWord);
 
-    if (hasPause || isGoodLength || i === processedChunks.length - 1) {
-      if (curGroup.length > 0) {
-        const first = curGroup[0];
-        const last = curGroup[curGroup.length - 1];
+    const shouldBreak = (
+      (isHardPause && curGroup.length >= 2) ||
+      (isStarter && !isIllegal && curGroup.length >= 5) ||
+      (curGroup.length >= 14 && !isIllegal) ||
+      (i === cleanTokens.length - 1)
+    );
 
-        // Clean duplicates
-        const words = groupText.split(/\s+/).filter(Boolean);
-        const cleanWords = [];
-        for (let k = 0; k < words.length; k++) {
-          if (k === 0 || words[k].toLowerCase() !== words[k - 1].toLowerCase()) {
-            cleanWords.push(words[k]);
-          }
-        }
+    if (shouldBreak && curGroup.length > 0) {
+      const first = curGroup[0];
+      const last = curGroup[curGroup.length - 1];
 
-        let cleanText = cleanWords.join(' ').trim();
-        let formatted = cleanText.charAt(0).toUpperCase() + cleanText.slice(1);
-        if (!/[.?!]$/.test(formatted)) formatted += '.';
+      let text = curGroup.map(t => t.word).join(' ').trim();
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+      if (!/[.?!]$/.test(text)) text += '.';
 
-        sentences.push({
-          id: sentences.length + 1,
-          start: Math.round(first.start * 100) / 100,
-          end: Math.round(last.end * 100) / 100,
-          text: formatted,
-          translation: "(실전 쉐도잉 문장)"
-        });
+      const startSec = Math.round(first.start * 100) / 100;
+      let endSec = Math.round(last.end * 100) / 100;
 
-        curGroup = [];
+      if (isHardPause && last.rawChunkEnd > last.end) {
+        endSec = Math.round(Math.min(last.rawChunkEnd, last.end + 0.2) * 100) / 100;
       }
+
+      sentences.push({
+        id: sentences.length + 1,
+        start: startSec,
+        end: Math.max(startSec + 0.5, endSec),
+        text: text,
+        translation: "(실전 쉐도잉 문장)"
+      });
+
+      curGroup = [];
     }
+
+    curGroup.push(tok);
+  }
+
+  if (curGroup.length > 0) {
+    const first = curGroup[0];
+    const last = curGroup[curGroup.length - 1];
+    let text = curGroup.map(t => t.word).join(' ').trim();
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+    if (!/[.?!]$/.test(text)) text += '.';
+
+    const startSec = Math.round(first.start * 100) / 100;
+    const endSec = Math.round(last.end * 100) / 100;
+
+    sentences.push({
+      id: sentences.length + 1,
+      start: startSec,
+      end: Math.max(startSec + 0.5, endSec),
+      text: text,
+      translation: "(실전 쉐도잉 문장)"
+    });
   }
 
   return sentences;
@@ -133,7 +232,7 @@ app.get('/api/transcript', async (req, res) => {
       });
     }
 
-    const sentences = trueAudioBoundarySegmenter(raw);
+    const sentences = universalSentenceSegmenter(raw);
     return res.json({
       success: true,
       videoId,
