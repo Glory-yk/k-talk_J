@@ -382,6 +382,242 @@ function showToast(msg) {
   setTimeout(() => { toast.style.opacity = '0'; }, 3000);
 }
 
+// ===== 단어 호버 사전 (Instant Dictionary Tooltip) 엔진 =====
+const dictCache = {};
+let dictHoverTimeout = null;
+let dictHideTimeout = null;
+let currentTooltipWord = null;
+
+const BUILTIN_DICT = {
+  'hi': { pos: '감탄사', meaning: '안녕, 안녕하세요' },
+  'guys': { pos: '명사', meaning: '여러분, 사람들, 친구들' },
+  'this': { pos: '대명사/형용사', meaning: '이것, 이 사람, 이번' },
+  'is': { pos: '동사', meaning: '~이다, 있다' },
+  'welcome': { pos: '동사/형용사', meaning: '환영하다; 반가운, 환영받는' },
+  'to': { pos: '전치사', meaning: '~로, ~에, ~을 향해' },
+  'day': { pos: '명사', meaning: '날, 하루, 일차' },
+  'of': { pos: '전치사', meaning: '~의, ~에 관한' },
+  'our': { pos: '대명사', meaning: '우리의, 저희의' },
+  'challenge': { pos: '명사/동사', meaning: '도전, 과제, 챌린지; 도전하다' },
+  'in': { pos: '전치사', meaning: '~안에, ~에서' },
+  'video': { pos: '명사', meaning: '영상, 비디오, 동영상' },
+  'you': { pos: '대명사', meaning: '너, 당신, 여러분' },
+  'will': { pos: '조동사', meaning: '~할 것이다, ~하겠다' },
+  'practice': { pos: '동사/명사', meaning: '연습하다, 실천하다; 연습, 훈련' },
+  'speaking': { pos: '명사/형용사', meaning: '말하기, 구어의, 스피킹' },
+  'with': { pos: '전치사', meaning: '~와 함께, ~을 가지고' },
+  'expressions': { pos: '명사', meaning: '표현들, 관용구들' },
+  'expression': { pos: '명사', meaning: '표현, 어구, 표정' },
+  'listen': { pos: '동사', meaning: '듣다, 귀 기울이다' },
+  'and': { pos: '접속사', meaning: '그리고, 와/과' },
+  'repeat': { pos: '동사', meaning: '따라하다, 반복하다, 되풀이하다' },
+  'today': { pos: '명사/부사', meaning: '오늘, 오늘날' },
+  'todays': { pos: '명사', meaning: '오늘의' },
+  'considering': { pos: '전치사/접속사', meaning: '~을 고려하면, ~을 감안할 때' },
+  'that': { pos: '접속사/대명사', meaning: '~라는 점, 저것, 그' },
+  'are': { pos: '동사', meaning: '~이다, 있다' },
+  'very': { pos: '부사', meaning: '매우, 아주, 대단히' },
+  'mature': { pos: '형용사', meaning: '성숙한, 어른스러운, 신중한' },
+  'dropped': { pos: '동사', meaning: '중퇴했다, 떨어뜨렸다' },
+  'drop': { pos: '동사/명사', meaning: '떨어지다, 그만두다; 방울' },
+  'out': { pos: '부사/전치사', meaning: '밖으로, 벗어나' },
+  'reed': { pos: '고유명사', meaning: '리드 (대학교 이름)' },
+  'college': { pos: '명사', meaning: '대학교, 단과대학' },
+  'after': { pos: '전치사/접속사', meaning: '~후에, ~뒤에' },
+  'first': { pos: '형용사/부사', meaning: '첫 번째의, 처음으로' },
+  'six': { pos: '수사', meaning: '여섯 (6)' },
+  'months': { pos: '명사', meaning: '달들, 개월' },
+  'month': { pos: '명사', meaning: '월, 달' },
+  'stayed': { pos: '동사', meaning: '머물렀다, 남아있었다' },
+  'stay': { pos: '동사', meaning: '머무르다, 계속 있다' },
+  'around': { pos: '전치사/부사', meaning: '주위에, 대략, 근처에' },
+  'as': { pos: '접속사/전치사', meaning: '~로서, ~처럼, ~할 때' },
+  'dropin': { pos: '명사/형용사', meaning: '청강생, 불쑥 들르는 사람' },
+  'another': { pos: '형용사/대명사', meaning: '또 다른, 또 하나의' },
+  'eighteen': { pos: '수사', meaning: '열여덟 (18)' },
+  'or': { pos: '접속사', meaning: '또는, 혹은' },
+  'so': { pos: '부사/접속사', meaning: '그렇게, 매우; 그래서' },
+  'before': { pos: '전치사/접속사', meaning: '~전에, 앞에' },
+  'really': { pos: '부사', meaning: '정말로, 실제로, 진짜로' },
+  'quit': { pos: '동사', meaning: '그만두다, 완전히 떠나다' },
+  'why': { pos: '부사', meaning: '왜, 어째서' },
+  'did': { pos: '동사', meaning: '했다' },
+  'started': { pos: '동사', meaning: '시작했다' },
+  'start': { pos: '동사/명사', meaning: '시작하다; 시작, 출발' },
+  'was': { pos: '동사', meaning: '~이었다, 있었다' },
+  'born': { pos: '동사/형용사', meaning: '태어난' },
+  'biological': { pos: '형용사', meaning: '생물학적인, 친-' },
+  'mother': { pos: '명사', meaning: '어머니, 엄마' },
+  'graduate': { pos: '명사/동사', meaning: '대학원생, 졸업생; 졸업하다' },
+  'student': { pos: '명사', meaning: '학생, 연구자' },
+  'decided': { pos: '동사', meaning: '결심했다, 결정했다' },
+  'put': { pos: '동사', meaning: '놓다, 보내다, 맡기다' },
+  'me': { pos: '대명사', meaning: '나를, 나에게' },
+  'up': { pos: '부사/전치사', meaning: '위로, 완전히' },
+  'for': { pos: '전치사', meaning: '~을 위해, ~동안' },
+  'adoption': { pos: '명사', meaning: '입양, 채택' },
+  'connect': { pos: '동사', meaning: '연결하다, 잇다' },
+  'connecting': { pos: '동사/형용사', meaning: '연결하는, 잇는' },
+  'dots': { pos: '명사', meaning: '점들, 요소들' },
+  'dot': { pos: '명사', meaning: '점, 작은 요소' },
+  'looking': { pos: '동사/형용사', meaning: '바라보는, 쳐다보는' },
+  'backward': { pos: '부사/형용사', meaning: '뒤로, 과거를 향해' },
+  'forward': { pos: '부사/형용사', meaning: '앞으로, 미래를 향해' },
+  'trust': { pos: '동사/명사', meaning: '신뢰하다, 믿다; 신뢰, 믿음' },
+  'future': { pos: '명사/형용사', meaning: '미래, 장래; 미래의' },
+  'destiny': { pos: '명사', meaning: '운명, 숙명' },
+  'karma': { pos: '명사', meaning: '인과응보, 카르마, 업보' },
+  'life': { pos: '명사', meaning: '인생, 삶, 생명' },
+  'curiosity': { pos: '명사', meaning: '호기심, 진기함' },
+  'intuition': { pos: '명사', meaning: '직관, 통찰력' },
+  'never': { pos: '부사', meaning: '결코 ~않다, 전혀' },
+  'let': { pos: '동사', meaning: '~하게 하다, 허락하다' },
+  'down': { pos: '부사/전치사', meaning: '아래로, 실망스럽게' },
+  'made': { pos: '동사', meaning: '만들었다' },
+  'all': { pos: '형용사/대명사', meaning: '모든, 전부의' },
+  'difference': { pos: '명사', meaning: '차이, 변화, 다름' },
+  'shadowing': { pos: '명사', meaning: '쉐도잉 (원어민 발음 즉시 따라 말하기)' },
+  'accuracy': { pos: '명사', meaning: '정확도, 정밀성' },
+  'pronunciation': { pos: '명사', meaning: '발음, 음성' }
+};
+
+function formatSentenceWithDictWords(text) {
+  if (!text) return '';
+  // Tokenize words and punctuations preserving structure
+  const tokens = text.split(/(\s+|[.,!?;:"'()\[\]{}]+)/);
+  
+  return tokens.map(token => {
+    if (!token || /^\s+$/.test(token) || /^[.,!?;:"'()\[\]{}]+$/.test(token)) {
+      return token;
+    }
+    const clean = token.toLowerCase().replace(/[^a-z0-9\-']/gi, '');
+    if (!clean) return token;
+    
+    return `<span class="dict-word" data-word="${clean}" onmouseenter="handleWordHover(event, '${clean}', '${token}')" onmouseleave="handleWordLeave()">${token}</span>`;
+  }).join('');
+}
+
+window.handleWordHover = function(e, cleanWord, origWord) {
+  clearTimeout(dictHideTimeout);
+  
+  dictHoverTimeout = setTimeout(async () => {
+    currentTooltipWord = cleanWord;
+    const tooltip = document.getElementById('word-dict-tooltip');
+    if (!tooltip) return;
+    
+    const wordNameEl = document.getElementById('dict-word-name');
+    const wordPosEl = document.getElementById('dict-word-pos');
+    const wordMeaningEl = document.getElementById('dict-word-meaning');
+    const btnSpeak = document.getElementById('dict-btn-speak');
+    const btnStar = document.getElementById('dict-btn-star');
+    
+    if (wordNameEl) wordNameEl.textContent = cleanWord;
+    if (wordPosEl) wordPosEl.textContent = '';
+    if (wordMeaningEl) wordMeaningEl.textContent = '단어 뜻을 찾는 중...';
+    
+    // Position tooltip nicely relative to hovered element
+    const rect = e.target.getBoundingClientRect();
+    const tooltipWidth = 240;
+    let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+    left = Math.max(10, Math.min(window.innerWidth - tooltipWidth - 15, left));
+    
+    let top = rect.top - 100;
+    if (top < 10) {
+      top = rect.bottom + 10;
+    }
+    
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+    tooltip.classList.add('visible');
+    
+    // Wire up TTS Speak Button
+    if (btnSpeak) {
+      btnSpeak.onclick = (ev) => {
+        ev.stopPropagation();
+        speakWord(cleanWord);
+      };
+    }
+    
+    // Check if word is in BUILTIN_DICT or dictCache
+    let entry = BUILTIN_DICT[cleanWord] || dictCache[cleanWord];
+    
+    if (!entry) {
+      try {
+        const res = await fetch(`/api/dict?word=${encodeURIComponent(cleanWord)}`);
+        const data = await res.json();
+        if (data && data.success && data.translation) {
+          entry = { pos: '사전', meaning: data.translation };
+          dictCache[cleanWord] = entry;
+        }
+      } catch (err) {
+        console.warn('Online dict lookup failed:', err);
+      }
+    }
+    
+    if (entry) {
+      if (wordPosEl) wordPosEl.textContent = `[${entry.pos || '단어'}]`;
+      if (wordMeaningEl) wordMeaningEl.textContent = entry.meaning;
+      
+      if (btnStar) {
+        btnStar.onclick = (ev) => {
+          ev.stopPropagation();
+          saveWordToVocabulary(cleanWord, entry.meaning);
+        };
+      }
+    } else {
+      if (wordMeaningEl) wordMeaningEl.textContent = '(단어 뜻 조회 중 또는 기본 단어)';
+    }
+  }, 100);
+};
+
+window.handleWordLeave = function() {
+  clearTimeout(dictHoverTimeout);
+  dictHideTimeout = setTimeout(() => {
+    const tooltip = document.getElementById('word-dict-tooltip');
+    if (tooltip && !tooltip.matches(':hover')) {
+      tooltip.classList.remove('visible');
+    }
+  }, 220);
+};
+
+// Tooltip mouse events to stay visible on hover
+document.addEventListener('DOMContentLoaded', () => {
+  const tooltip = document.getElementById('word-dict-tooltip');
+  if (tooltip) {
+    tooltip.addEventListener('mouseenter', () => clearTimeout(dictHideTimeout));
+    tooltip.addEventListener('mouseleave', () => {
+      dictHideTimeout = setTimeout(() => {
+        tooltip.classList.remove('visible');
+      }, 150);
+    });
+  }
+});
+
+function speakWord(word) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function saveWordToVocabulary(word, meaning) {
+  const voca = JSON.parse(localStorage.getItem('voca_words') || '[]');
+  if (!voca.some(item => item.word.toLowerCase() === word.toLowerCase())) {
+    voca.unshift({
+      word: word,
+      meaning: meaning,
+      date: new Date().toLocaleDateString()
+    });
+    localStorage.setItem('voca_words', JSON.stringify(voca));
+    showToast(`⭐ 단어장에 저장되었습니다: '${word}'`);
+  } else {
+    showToast(`💡 이미 단어장에 저장된 단어입니다: '${word}'`);
+  }
+}
+
 // Sentence Selection & UI Update
 function selectSentence(index, shouldPlay = true) {
   if (!currentLesson || !currentLesson.subtitles || !currentLesson.subtitles.length) return;
@@ -394,7 +630,7 @@ function selectSentence(index, shouldPlay = true) {
   const transEl = document.getElementById('current-translation');
   const indexBadge = document.getElementById('sentence-badge');
   
-  if (origEl) origEl.textContent = sentence.text;
+  if (origEl) origEl.innerHTML = formatSentenceWithDictWords(sentence.text);
   if (transEl) transEl.textContent = sentence.translation;
   if (indexBadge) indexBadge.textContent = `${index + 1} / ${currentLesson.subtitles.length}`;
   
@@ -444,7 +680,7 @@ function renderTranscriptList() {
           </button>
         </div>
       </div>
-      <div class="item-orig">${sub.text}</div>
+      <div class="item-orig">${formatSentenceWithDictWords(sub.text)}</div>
       <div class="item-trans">${sub.translation}</div>
     </div>
   `).join('');

@@ -410,8 +410,33 @@
     </div>
   </div>
 
+  <!-- Floating Glassmorphic Word Dictionary Tooltip -->
+  <div id="word-dict-tooltip" class="word-dict-tooltip">
+    <div class="dict-tooltip-header">
+      <div class="dict-word-title-group">
+        <span class="dict-tooltip-word" id="dict-word-name">word</span>
+        <span class="dict-tooltip-pos" id="dict-word-pos">[명사]</span>
+      </div>
+      <div class="dict-tooltip-actions">
+        <button class="dict-action-btn" id="dict-btn-speak" title="발음 듣기 (TTS)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </button>
+        <button class="dict-action-btn" id="dict-btn-star" title="내 단어장에 저장">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="dict-tooltip-meaning" id="dict-word-meaning">단어 뜻을 찾는 중...</div>
+    <div class="dict-tooltip-footer">💡 클릭하여 발음 듣기 또는 단어장 저장</div>
+  </div>
+
   <!-- Scripts -->
-  <script src="samples.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="samples.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

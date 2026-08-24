@@ -248,6 +248,55 @@ app.get('/api/transcript', async (req, res) => {
   }
 });
 
+// Dictionary & Translation API for Hover Word Lookup
+app.get('/api/dict', async (req, res) => {
+  const { word } = req.query;
+  if (!word) return res.status(400).json({ error: 'word is required' });
+
+  const cleanWord = word.toLowerCase().trim().replace(/[^a-z0-9\-']/gi, '');
+  if (!cleanWord) return res.json({ word, meaning: '' });
+
+  try {
+    // Try Google Translate Free API for Korean translation
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&dt=bd&q=${encodeURIComponent(cleanWord)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    let translation = '';
+    let pos = '';
+
+    if (data && data[0] && data[0][0] && data[0][0][0]) {
+      translation = data[0][0][0];
+    }
+
+    if (data && data[1] && data[1].length > 0) {
+      // Detailed dictionary definitions with parts of speech
+      const details = data[1].map(item => {
+        const p = item[0]; // part of speech
+        const meanings = (item[1] || []).slice(0, 3).join(', ');
+        return `[${p}] ${meanings}`;
+      }).join(' / ');
+
+      if (details) {
+        translation = details;
+      }
+    }
+
+    return res.json({
+      success: true,
+      word: cleanWord,
+      translation: translation || '(번역 결과 없음)'
+    });
+  } catch (err) {
+    console.error('Dict lookup error:', err.message);
+    return res.json({
+      success: false,
+      word: cleanWord,
+      translation: ''
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🎬 YouTube AI Shadowing Server running at http://localhost:${PORT}`);
 });

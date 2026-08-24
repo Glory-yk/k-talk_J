@@ -1139,6 +1139,123 @@ body {
   background: rgba(255, 235, 59, 0.25);
 }
 
+/* Interactive Word Hover & Dictionary Tooltip */
+.dict-word {
+  cursor: pointer;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.dict-word:hover {
+  color: var(--accent-cyan) !important;
+  background: rgba(0, 242, 254, 0.18);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent-cyan);
+}
+
+.word-dict-tooltip {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: auto;
+  min-width: 220px;
+  max-width: 300px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(0, 242, 254, 0.45);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 242, 254, 0.25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  backdrop-filter: blur(16px);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.word-dict-tooltip.visible {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dict-tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 6px;
+}
+
+.dict-word-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.dict-tooltip-word {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+}
+
+.dict-tooltip-pos {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.dict-tooltip-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.dict-action-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dict-action-btn:hover {
+  background: rgba(0, 242, 254, 0.25);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: scale(1.08);
+}
+
+.dict-action-btn.active {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+}
+
+.dict-tooltip-meaning {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.dict-tooltip-footer {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 4px;
+}
+
+
 
 
 
