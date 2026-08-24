@@ -496,20 +496,66 @@ window.deleteSentence = function(idx) {
   showToast('구간을 삭제했습니다. (실행 취소: ⌘Z)');
 };
 
-// Edit existing sentence (with undo support)
-window.editSentence = function(idx) {
+// In-App Modal Sentence Editing (with undo support)
+let editingSentenceIndex = null;
+
+window.openEditModal = function(idx) {
   if (!currentLesson || !currentLesson.subtitles[idx]) return;
+  editingSentenceIndex = idx;
   const s = currentLesson.subtitles[idx];
-  const newText = prompt("문장 수정:", s.text);
-  if (newText !== null) {
-    pushHistory();
-    s.text = newText;
-    const newTrans = prompt("번역 수정:", s.translation);
-    if (newTrans !== null) s.translation = newTrans;
-    renderTranscriptList();
-    selectSentence(idx, false);
-    showToast('문장 수정 완료 (실행 취소: ⌘Z)');
+  
+  const txtInput = document.getElementById('modal-edit-text');
+  const transInput = document.getElementById('modal-edit-trans');
+  const startInput = document.getElementById('modal-edit-start');
+  const endInput = document.getElementById('modal-edit-end');
+  
+  if (txtInput) txtInput.value = s.text || '';
+  if (transInput) transInput.value = s.translation || '';
+  if (startInput) startInput.value = s.start || 0;
+  if (endInput) endInput.value = s.end || 0;
+  
+  const modal = document.getElementById('edit-sentence-modal');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeEditModal = function() {
+  const modal = document.getElementById('edit-sentence-modal');
+  if (modal) modal.style.display = 'none';
+  editingSentenceIndex = null;
+};
+
+window.saveEditedSentence = function() {
+  if (editingSentenceIndex === null || !currentLesson || !currentLesson.subtitles[editingSentenceIndex]) {
+    closeEditModal();
+    return;
   }
+  
+  const newText = document.getElementById('modal-edit-text').value.trim();
+  const newTrans = document.getElementById('modal-edit-trans').value.trim();
+  const newStart = parseFloat(document.getElementById('modal-edit-start').value) || 0;
+  const newEnd = parseFloat(document.getElementById('modal-edit-end').value) || 0;
+  
+  if (!newText) {
+    alert('원문 대본을 입력해주세요.');
+    return;
+  }
+  
+  pushHistory();
+  
+  const s = currentLesson.subtitles[editingSentenceIndex];
+  s.text = newText;
+  s.translation = newTrans;
+  s.start = Math.max(0, Math.round(newStart * 100) / 100);
+  s.end = Math.max(s.start + 0.5, Math.round(newEnd * 100) / 100);
+  
+  renderTranscriptList();
+  selectSentence(editingSentenceIndex, false);
+  closeEditModal();
+  showToast('✏️ 문장 및 타임스탬프 수정 완료 (실행 취소: ⌘Z)');
+};
+
+window.editSentence = function(idx) {
+  openEditModal(idx);
 };
 
 // Add Current Time as New Sentence Checkpoint (with undo support)
