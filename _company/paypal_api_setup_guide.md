@@ -13,7 +13,7 @@
 
 ## 1️⃣ 앱 등록 및 자격 증명 발급 (2 분 소요)
 
-1. **[PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications)** 접속
+1. **[PayPal Developer Dashboard](**[링크]** https://developer.paypal.com/dashboard/applications)** 접속
    - 로그인 후 `Apps & Credentials` 메뉴 클릭
    - `Live App` 선택 (실제 결제 환경 사용 시)
    - `Create App` 버튼 클릭 → 앱 이름 입력 (`Makemoney-KTalkAI`) → 생성
