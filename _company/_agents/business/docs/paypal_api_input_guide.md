@@ -7,7 +7,34 @@
 ---
 
 ## 🔑 준비물 (필수)
-PayPal Developer Dashboard 에서 발급받은 자격 증명입니다.
+🚨 중요: PayPal API 키 입력 절차 (최신 2026-08-24 기준)
+============================================================
+
+## 📌 현행 상황
+❌ 시스템에 Client ID 및 Secret 이 비어있습니다.
+✅ `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json` 파일이 있지만 인증 정보가 누락됨
+
+## 🔑 입력 방법 (3 단계)
+
+### 1️⃣ PayPal Developer Dashboard 접속
+🌐 https://developer.paypal.com/dashboard/applications
+→ Apps & Credentials → 본인 앱 선택 → **Generate New App** 클릭
+- App Name: `Makemoney-Business-App` 또는 기존 앱 선택
+- Mode: **Live** (실제 결제 테스트용)
+
+### 2️⃣ Client ID 및 Secret 추출
+- 앱 상세 페이지에서 **Client ID** 복사 (상단 하얀색 텍스트)
+- **Generate Secret** 버튼 클릭 후 **Secret Key** 복사 (1~2 초 대기 필요)
+
+### 3️⃣ 시스템에 입력
+📂 위치: `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json`
+```json
+{
+  "client_id": "여기에_복사한_Client_ID_넣기",
+  "client_secret": "여기에_복사한_Secret_Key_넣기",
+  "mode": "live"
+}
+ 에서 발급받은 자격 증명입니다.
 - [ ] Client ID
 - [ ] Secret Key
 - [ ] 샌드박스/라이브 모드 선택 여부
