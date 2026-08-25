@@ -1,63 +1,45 @@
-# 🗝️ PayPal API 키 입력 가이드 (CEO 전용)
+# 💰 PayPal API 키 입력 가이드 (CEO 전용)
 
-**작성일:** 2026-08-25  
-**작성자:** 현빈 (머니메이커)  
-**목적:** Makemoney AI Lab 실시간 매출 분석 파이프라인 가동을 위한 환경 설정
+## ⚠️ 중요: 수익화 자동화를 위한 필수 작업입니다
+현빈 에이전트가 매출 데이터를 분석하여 가격 전략과 마케팅 퍼널을 최적화하려면, **PayPal Developer Dashboard** 에서 발급한 인증 정보가 필요합니다. 지금 바로 입력해 주세요! 데이터 없이는 "수익화"가 불가능합니다.
 
----
+## 📥 API 키 발급 및 입력 방법 (3 분 내 완료)
 
-## ⚠️ 중요: API 키는 절대 남에게 공유하지 마세요!
-비밀번호처럼 관리해 주세요. `.env` 파일은 반드시 Git 에 커밋되지 않도록 `.gitignore` 에 등록되어 있습니다.
+1.  **[로그인]** https://developer.paypal.com/developers/applications/
+2.  **앱 생성:** 본인 이름의 앱 (예: `Makemoney-KTalkAI`) 을 생성하세요.
+3.  **인증 정보 복사:**
+    *   좌측 메뉴 `Credentials` 클릭
+    *   `Live` 탭 선택 (수익화용 필수)
+    *   아래 두 값을 복사:
+        *   **Client ID**
+        *   **Client Secret**
 
-## 1 단계: PayPal Developer Dashboard 에서 앱 생성
+## 📝 입력 위치 (`.env` 파일)
 
-1.  [https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications) 로 이동합니다.
-2.  **Apps & Credentials** 메뉴를 클릭하세요.
-3.  **+ Create App** 버튼을 눌러 새 앱을 생성합니다.
-4.  **앱 이름:** `Makemoney ConnectAI` (또는 내부용 테스트용 앱명)
-5.  **Country of residence:** 본인 거주국 선택 (한국 또는 미국 등)
-6.  생성 후 **App ID** 나 **Client ID** 가 표시되면 복사해 둡니다.
+시스템이 자동으로 `.env` 파일을 생성할 것입니다. 해당 경로에 위 값을 덮어씌워 주세요.
 
-## 2 단계: Secret Key (비밀키) 발급 및 저장
-
-1.  **Live** 환경과 **Sandbox** 환경을 구분하세요. 실제 매출을 보고 싶다면 **Live** 환경 키가 필요합니다.
-2.  앱 생성 후 설정 화면에서 **Secret key** 를 요청할 수 있습니다.
-3.  아래 명령어로 `.env` 파일에 입력하세요:
-
+📂 **파イル 경로:**
 ```bash
-CLIENT_ID="여기에 복사한 Live Client ID 를 붙여넣으세요"
-CLIENT_SECRET="여기에 복사한 Secret Key 를 붙여넣으세요"
-APP_ENV="live" # 테스트용이라면 "sandbox", 실제 매출 보고는 "live"로 변경
+/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env
 ```
 
-## 3 단계: 환경 변수 파일 (.env) 생성 및 입력
-
-1.  프로젝트 루트 폴더에 `.env` 파일을 만듭니다.
-2.  위 안내와 같이 `CLIENT_ID`, `CLIENT_SECRET` 을 적습니다.
-3.  저장 후 터미널을 다시 켜세요.
-
-## 4 단계: 데이터 파이프라인 가동 확인
-
-1.  다음 명령어로 API 연동 테스트를 실행합니다.
+📋 **입력 형식 예시:**
 ```bash
-cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools"
-python3 setup_env.py
-python3 paypal_revenue.py
+PAYPAL_CLIENT_ID=여기에_복사한_Client_ID_넣기
+PAYPAL_CLIENT_SECRET=여기에_복사한_Client_Secret_넣기
 ```
-2.  성공 시 `sessions/` 폴더에 실시간 매출 로그가 저장됩니다.
+
+## 🚀 입력 후 실행 명령어
+
+파일 편집기를 닫고 터미널에서 아래 명령어를 실행하시면 됩니다.
+
+<run_command>cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools" && python3 setup_env.py</run_command>bash
+# 위 명령어는 환경 변수를 읽어 검증하고, 파이프라인을 다시 시작합니다.
+```
+
+## 💡 팁: 데이터가 없으면 분석 불가입니다!
+코다리 에이전트가 스크립트만 짜고 있더라도, **실제 결제 데이터 (Transaction ID)** 가 들어오지 않으면 매출 분석은 불가능합니다. 지금 바로 발급해서 입력하세요! 5 분 안에 첫 번째 데이터를 수집할 수 있습니다.
 
 ---
-
-## 📈 기대 효과 (ROI)
-
-- **데이터 기반 의사결정:** 실제 결제 수량과 금액을 분석하여 가격 전략 수정 가능.
-- **자동화 마진 증대:** 매출 보고를 사람이 직접 하지 않아도 자동화되므로 시간 절감.
-- **신뢰도 확보:** "실제 매출 데이터"가 있는 에이전시로서 고객 신뢰도 상승.
-
-**🔒 보안 주의:**
-API 키는 `.env` 파일 내에 저장됩니다. 시스템이 자동으로 Git 에 포함되지 않도록 설정되어 있으나, 절대 이 파일을 타인에게 보여주지 마세요.
-
----
-
-**💰 현빈의 조언:**
-"데이터가 없는 분석은 무책임합니다. API 키 입력이 바로 수익화의 첫걸음입니다. 지금 바로 입력하고 파이프라인을 켜세요!"
+**📊 평가: 대기 — 사용자의 API 키 입력이 필수적임.**
+**📝 다음 단계: 코다리에게 파이프라인 재시작 지시 후, CEO 에게 가이드 공유 및 키 입력 요청 완료 시 분석 재시작.**
