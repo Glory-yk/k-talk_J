@@ -84,6 +84,40 @@
       "preAlarmsSent": [],
       "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
       "completedAt": "2026-08-25T21:17:14.157Z"
+    },
+    {
+      "id": "20260825213052-qvr8",
+      "title": "PayPal 매출 데이터 파이프라인 (`paypal_revenue.py`) 가동 및 첫 수집 시도",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:30:52.190Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-28",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-28/_report.md\n- 현빈 (머니메이커): 회사 목표와 각 에이전트 개인 목표를 검토한 후 가장 가치 있는 작업 1개 결정하고 진행\n\nCEO 종합 요점: 💰 현빈 (머니메이커): 작업 시작합니다.\n\n대표님, 지금 가장 시급한 것은 **PayPal API 환경 설정**입니다. 수익화 데이터 없이는 모든 전략이 공허하니, 코다리와 협력해 바로 파이프라인을 가동하겠습니다. 우선 가이드를 최신화하고 실행 환경을 점검합니다.\n\n<create_file path=\"/Users/glory/Desktop/coding/Ma",
+      "completedAt": "2026-08-25T21:30:52.207Z"
+    },
+    {
+      "id": "20260825213052-6od0",
+      "title": "수집된 데이터를 `sessions/2026-08-25T.../revenue_data.json` 로 저장",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:30:52.199Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-28",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-28/_report.md\n- 현빈 (머니메이커): 회사 목표와 각 에이전트 개인 목표를 검토한 후 가장 가치 있는 작업 1개 결정하고 진행\n\nCEO 종합 요점: 💰 현빈 (머니메이커): 작업 시작합니다.\n\n대표님, 지금 가장 시급한 것은 **PayPal API 환경 설정**입니다. 수익화 데이터 없이는 모든 전략이 공허하니, 코다리와 협력해 바로 파이프라인을 가동하겠습니다. 우선 가이드를 최신화하고 실행 환경을 점검합니다.\n\n<create_file path=\"/Users/glory/Desktop/coding/Ma",
+      "completedAt": "2026-08-25T21:30:52.214Z"
     }
   ]
 }
