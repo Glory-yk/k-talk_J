@@ -1,0 +1,89 @@
+{
+  "tasks": [
+    {
+      "id": "20260825211713-zqfm",
+      "title": "`ceo_paypal_api_guide.md` 최신화 및 템플릿 생성",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:17:13.900Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-13",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
+      "completedAt": "2026-08-25T21:17:14.109Z"
+    },
+    {
+      "id": "20260825211714-9qzp",
+      "title": "`setup_env.py` 스크립트 작성 및 실행",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:17:14.074Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-13",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
+      "completedAt": "2026-08-25T21:17:14.118Z"
+    },
+    {
+      "id": "20260825211714-uh80",
+      "title": "환경 변수 (client_id, client_secret) 로깅 및 백업",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:17:14.082Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-13",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
+      "completedAt": "2026-08-25T21:17:14.129Z"
+    },
+    {
+      "id": "20260825211714-0ran",
+      "title": "PayPal API 키 설정 가이드 작성 및 사용자에게 발송 완료.",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:17:14.089Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-13",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
+      "completedAt": "2026-08-25T21:17:14.142Z"
+    },
+    {
+      "id": "20260825211714-p2q5",
+      "title": "`setup_env.py` 스크립트 실행 후 로깅 확인.",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-08-25T21:17:14.097Z",
+      "status": "done",
+      "sessionDir": "2026-08-25T21-13",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-08-25T21-13/_report.md\n- 현빈 (머니메이커): 수익화 전략 검토 및 가장 효과적인 작업 결정\n\nCEO 종합 요점: 💰 현빈 (머니메이커): CEO 지시대로 가장 가치 있는 단일 작업과 에이전트 분배를 결정합니다.\n\n## 🎯 결정: PayPal API 환경 설정 완료 및 데이터 파이프라인 가동\n\n### 📌 선택 근거\n1.  **데이터 부재**: 수익화 전략 분석 (회전율, ROI 등) 이 불가능하여 모든 전략이 공중분해 상태.\n2.  **병목 요소**: 코다리가 A",
+      "completedAt": "2026-08-25T21:17:14.157Z"
+    }
+  ]
+}
