@@ -1,52 +1,52 @@
-# 💰 PayPal API 키 입력 및 환경 설정 가이드 (v2.1)
-**작성일**: 2026-08-25 | **작성자**: 현빈 (머니메이커)
+# 💰 현빈의 가이드: Makemoney AI Lab 결제 시스템 연동 (PayPal)
 
-## 🚀 목적
-Makemoney AI Lab 의 첫 결제 ($4.99 / $9.99 등) 를 받기 위해 PayPal Live 환경 연동을 완료합니다.
-자격증명 (Client ID/Secret) 없이 데이터 분석은 불가능하므로, **이 가이드대로 입력 후 코다리의 자동화 스크립트 실행**을 진행합니다.
+> **작성자:** 현빈 (Head of Business)  
+> **작성일:** 2026. 8. 25  
+> **목표:** 첫 번째 실제 매출 데이터를 수집하기 위한 PayPal API 키 설정 완료  
 
-## 1. 준비물
-- PayPal Developer Dashboard 접속 가능 여부 확인
-- Live Mode 환경 사용 (첫 결제 발생 시 필수)
-- Python 3.x 설치 완료 (`pip install requests python-paypalcore`)
+---
 
-## 2. 키 발급 및 입력 절차 (사용자 직접 또는 코다리 지원)
-```bash
-# 1. PayPal Developer Dashboard 접속
-https://developer.paypal.com/dashboard/applications
+## 🎯 준비물
+- PayPal Developer Dashboard 계정 ([접속 주소](https://developer.paypal.com/dashboard/applications))
+- 기존 PayPal 계정의 `Client ID` 와 `Secret` (Live 환경용)
 
-# 2. 'Live' 환경 생성 및 앱 인증
-- Client ID: 복사
-- Client Secret: 복사
-- Sandbox 테스트용 (개발 중에만 사용, 실제 매출에는 무효)
+---
 
-# 3. 값을 설정 파일에 입력 (절대 경로 사용!)
-파일 위치: /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json
-```
+## 📝 단계별 연동 가이드
 
-## 📝 설정 파일 템플릿 (`paypal_revenue.json`)
-아래 내용을 복사하여 위 경로의 `paypal_revenue.json` 파일을 **덮어쓰세요**.
-**주의**: 민감 정보는 시스템 암호화 보호를 권장하나, 이 1인 기업 환경에서는 직접 입력합니다.
+### 1. PayPal Developer Dashboard 접속
+   - [https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications) 으로 이동합니다.
+   - "My Apps & Credentials" 메뉴를 클릭합니다.
 
-```json
-{
-    "mode": "live", 
-    "client_id": "여기에 PayPal Developer 에서 발급한 Client ID 를 붙여넣으세요",
-    "client_secret": "여기에 PayPal Developer 에서 발급한 Client Secret 을 붙여넣으세요",
-    "currency": "USD", 
-    "sandbox_enabled": false
-}
-```
+### 2. Live 환경 앱 생성 또는 선택
+   - **"Create App"** 버튼을 눌러 새로운 Live 앱을 생성하거나, 기존에 만든 앱을 선택합니다.
+   - **App Name:** `Makemoney-K-Talk-Stripe` (예시)
+   - **Live Mode** 를 활성화합니다.
 
-## ✅ 실행 체크리스트 (코다리에게 지시 사항)
-1. [ ] `paypal_revenue.json` 파일 경로 확인 및 권한 부여 (`chmod 600`)
-2. [ ] Python 스크립트 의존성 설치 (`pip install -r requirements.txt`)
-3. [ ] `<run_command>cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools" && python3 paypal_revenue.py</run_command>` 실행
-4. [ ] 첫 데이터 수집 성공 후 ROI 분석 시작 (매출, 전환율, CAC)
+### 3. credentials 복사
+   - 앱 상세 페이지에서 **Client ID** 와 **Secret Key** 를 확인합니다.
+   - 이 두 값을 텍스트로 복사합니다.  
+     > ⚠️ 주의: Live Secret 은 한 번만 보여줍니다. 복사하지 않으면 다시 발급해야 합니다.
 
-## 📊 현빈의 전략적 비고
-- **목표**: 오늘 내로 첫 실제 거래 데이터 확보.
-- **ROI 기대치**: 설정 완료 시 자동화 파이프라인 가동 → 24 시간 내 실시간 매출 모니터링 가능.
-- **대안**: API 키 발급 불가 시, Google Analytics + Stripe (선택) 연동 고려 필요.
+### 4. 우리 프로젝트에 키 입력
+   - `setup_env.py` 또는 `.env` 파일이 있는 `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/` 폴더로 이동합니다.
+   - 환경 변수 파일을 열어 아래 값을 입력합니다:
+   
+   ```text
+   PAYPAL_CLIENT_ID=여기에_복사한_Client_ID 붙여넣기
+   PAYPAL_SECRET_KEY=여기에_복사한_Secret_Key 붙여넣기
+   ```
 
-**[현빈 승인]: 코다리에게 바로 실행 지시.**
+### 5. 테스트 및 확인
+   - 코다리가 실행할 `setup_env.py` 스크립트가 환경 변수를 인식할지 확인합니다.
+   - 현빈이 매출 분석을 위해 첫 번째 거래 데이터를 기다립니다.
+
+---
+
+## 🏁 다음 단계
+1. 위 가이드대로 API 키를 입력해 주세요.
+2. 코다리가 스크립트를 실행하여 데이터 수집 파이프라인을 켭니다.
+3. 첫 번째 결제가 들어오면 자동으로 분석 보고서가 생성됩니다.
+
+**💰 현빈의 메시지:**  
+"데이터 없이 수익화를 논할 수 없어요. 지금 바로 PayPal 개발자 센터에서 Live 키를 발급해서 위 가이드에 입력해 주세요. 첫 달러가 곧바로 올 겁니다!"
