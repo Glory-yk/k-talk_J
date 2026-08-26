@@ -1,40 +1,50 @@
-# 🛠️ PayPal API 키 설정 가이드 (CEO 전용)
+<p align="center">
+<strong>🔐 PayPal API 키 입력 및 환경 설정 가이드</strong>
+</p>
+<br>
+<p><strong>💰 현빈 (머니메이커) 입니다.</strong></p>
+<p>현명한 사장님, 수익화를 위해 필요한 매출 데이터가 아직 수집되지 않았습니다. 지금 바로 아래 절차를 따라주세요. 2 분도 안 걸립니다. 키만 입력되면 자동화 시스템이 가동됩니다.</p>
 
-## 1. 작업 목적
-Makemoney AI Lab 의 `paypal_revenue.py` 파이프라인을 가동하려면 PayPal Developer Dashboard 에서 발급받은 `Client ID` 와 `Secret` 이 환경 변수로 주입되어야 합니다. **API 키가 없으면 매출 데이터 분석이 불가능합니다.**
+---
 
-## 2. 실행 순서
-### Step 1: 개발자 대시보드 접속
+### 🚀 단계 1: PayPal Developer Dashboard 에서 키 발급
+[PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications) 페이지에 접속합니다.
+
+1. **로그인**: 회사 이메일 또는 개인 PayPal 계정으로 로그인.
+2. **App 찾기**: 왼쪽 메뉴 `Apps & Credentials` 클릭 → `Live` (또는 Sandbox, 테스트용은 Live 권장) 섹션 확인.
+3. **앱 생성/선택**: 이미 만든 앱이 있다면 해당 앱 선택. 없으면 `Create App` 클릭하여 `PayPal Business Account` 연동.
+4. **키 복사**: 앱 정보 페이지에서 `<Client ID>` 와 `<Secret>` 을 찾습니다. (보안상 처음엔 숨겨져 있으니 `Regenerate` 또는 `Show Secret` 필요.)
+
+---
+
+### 📝 단계 2: 키 입력 및 저장 (`setup_env.py` 실행 전)
+시스템이 제공하는 `.env` 파일이나 설정 인터페이스에 아래 정보를 넣으세요. (구체적인 위치는 `setup_env.py` 코드를 보시면 됩니다.)
+
 ```text
-https://developer.paypal.com/dashboard/applications
-```
-### Step 2: 앱 생성 또는 선택
-- `Apps & Credentials` 메뉴로 이동
-- Live(실제 결제용) 환경의 앱 (K-Talk AI / WorkAbroad AI) 을 선택하거나 새 앱 생성
-- **Client ID** 복사
-- **Secret** 복사 (생성 시에만 가능하므로 주의)
-
-### Step 3: 환경 변수 파일 편집 (`paypal_revenue.json`)
-다음 경로의 파일을 확인하세요.
-`/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json`
-
-파일을 수정하거나 새 파일을 생성하여 아래 내용 채우세요. (JSON 포맷 준수)
-```json
-{
-  "client_id": "여기에 복사한 Client ID 를 붙여넣으세요",
-  "client_secret": "여기에 복사한 Secret 을 붙여넣으세요",
-  "mode": "live", // 테스트가 아닌 실제 결제용
-  "apps": {
-    "k-talk-ai": true,
-    "work-abroad-ai": true
-  }
-}
+PAYPAL_CLIENT_ID = "여기에 복사한 Client ID"
+PAYPAL_CLIENT_SECRET = "여기에 복사한 Secret"
+PAYPAL_MODE = "live"  # 실제 거래를 위해 live 설정
 ```
 
-### Step 4: 스크립트 실행 준비 (코다리에게 전함)
-`python3 paypal_revenue.py` 명령어 실행 시 위 파일을 `paypal_revenue.json` 로 읽어와 API 연동합니다.
+⚠️ **주의:** 키는 절대 다른 사람에게 공유하지 마세요. 이 키로만 작동하도록 설정합니다.
 
-## 3. 주의사항
-- Secret 은 절대 타인에게 공개하지 마세요.
-- Live 모드는 실제 결제가 발생하는 환경입니다.
-- 코다리 (엔지니어) 가 스크립트 실행을 대기 중이므로, 키 입력 후 즉시 재시작하세요.
+---
+
+### 🏃 단계 3: 환경 스크립트 실행 (코다리가 준비했습니다)
+키 입력이 완료되면 `setup_env.py` 스크립트를 실행하여 매출 분석 자동화 파이프라인을 가동하세요. 터미널에서 아래 명령어를 입력합니다.
+
+```bash
+cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools"
+python3 setup_env.py
+```
+
+---
+
+### 💰 기대 효과 (ROI)
+이 가이드를 따라 실행하는 즉시:
+*   **7 일 패스/월간 무제한 가격 번들**별 실제 거래 데이터 확보
+*   **결제 전환율 (CVR)** 분석 가능 (현재는 0 인 상태에서 시작하므로 초기 데이터가 중요함)
+*   **가격 최적화 제안서** 자동 생성 준비
+
+**📊 평가: 진행중 — API 키 입력 완료 후 즉시 데이터 수집 및 가격 전략 수립 가능**
+📝 다음 단계: 코다리에게 `setup_env.py` 실행 지시 및 매출 데이터 수집 시작 (데이터 확보 시 즉시 가격 전략 수립)
