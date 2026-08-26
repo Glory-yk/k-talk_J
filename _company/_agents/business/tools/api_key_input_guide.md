@@ -1,24 +1,21 @@
-<find>empty</find><replace># 💰 현빈 (머니메이커) — API 키 입력 가이드 (2026. 8. 27)
+<file>
+# 💰 현빈 (머니메이커) — PayPal API 키 입력 가이드
 
-## 🚨 지금 해야 할 것
-1. **PayPal Developer Dashboard** 접속: https://developer.paypal.com/dashboard/applications
-2. **Apps & Credentials** 메뉴 클릭 → 본인 앱 생성 또는 기존 앱 선택
-3. **Client ID** 와 **Secret** 을 위 `.env.template` 파일의 변수 자리 (`YOUR_...`) 에 맞춰 입력하세요.
+## 📋 사용법
+1. 아래 코드 블록을 복사하여 `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env` 파일로 저장하세요.
+2. **PayPal Developer Dashboard** (https://developer.paypal.com/dashboard/applications) 에서 발급받은 `CLIENT_ID` 와 `CLIENT_SECRET` 을 정확히 입력하세요.
+3. 저장 후 터미널에서 다음 명령어를 실행하면 매출 데이터 수집이 시작됩니다.
 
-## 📋 .env 파일 채우기 (반드시 직접 복사)
-코다리가 만든 템플릿 파일을 열어서, 각 앱별 키를 붙여넣으세요.
 ```bash
-# 예시: K-Talk AI 앱용 키 입력
-K_TALK_CLIENT_ID=AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
-
-# 예시: WorkAbroad AI 앱용 키 입력
-WORKABROAD_CLIENT_SECRET=aBcDeFgHiJkLmNoPqRsTuVwXyZ0_abcde
+# 환경 변수 설정 확인 및 데이터 수집 스크립트 실행
+cd /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools
+python3 paypal_revenue.py
 ```
 
 ## ⚠️ 주의사항
-- **Live Environment**: 실제 결제 테스트를 위해 Live 환경 API 키 사용 필수.
-- **보안**: `.env` 파일은 절대 git 에 업로드 금지 (`.gitignore` 설정 필요).
+- **Live Mode** 를 사용 중이므로, 테스트용 sandbox 토큰을 실수로 입력하지 마세요.
+- API 키는 민감한 정보이므로 `.gitignore` 에 추가되어 버전 컨트롤에 포함되지 않도록 설정되어 있습니다.
+- 입력 후 데이터 수집이 완료되면 분석 결과가 자동으로 보고됩니다.
 
 ---
-**🔜 다음 단계**: 코다리에게 이 가이드 내용을 바탕으로 `.env` 파일을 생성하고, 사용자 입력을 기다리게 지시하세요.
-</replace>
+*생성: 💰 현빈 (머니메이커) | 2026. 8. 27.*
