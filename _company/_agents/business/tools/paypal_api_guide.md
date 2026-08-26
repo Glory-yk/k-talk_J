@@ -1,42 +1,31 @@
-# 💰 PayPal API 인증 및 환경 설정 가이드 (현빈 편)
+# 🚀 PayPal API 키 입력 가이드 (머니메이커)
 
-## 🚨 중요: 매출 분석을 위한 첫걸음
-지금 우리가 막혀있는 이유는 **PayPal의 API 키 (Client ID & Secret)**가 없기 때문입니다. 이 키를 입력하지 않으면 한 푼도 벌 수 없습니다. 코다리와 현빈이 준비된 환경 설정 가이드입니다.
+## 💰 대표님, 지금 바로 따라하세요!
+수익화 전략은 매출 데이터에서 나옵니다. 데이터를 가져오기 위해 **PayPal Developer Dashboard**에서 인증 정보가 필요합니다. 아래 단계를 3 분 안에 완료하세요.
 
-## 1️⃣ PayPal Developer Dashboard 에서 자격증명 발급
-1.  https://developer.paypal.com/dashboard/applications 에 접속하세요.
-2.  **Apps & Credentials** 메뉴로 이동합니다.
-3.  **Live 환경** (실제 결제가 가능한 환경) 을 선택한 후, `Create App` 버튼을 누릅니다.
-4.  앱 이름을 `Makemoney-Live-Sales` 등으로 설정하고 생성합니다.
-5.  생성된 화면에서 **Client ID** 와 **Secret**을 복사해옵니다.
-
-## 2️⃣ `.env` 파일에 입력하기
-코다리가 준비한 `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env` 파일을 엽니다. (없다면 아래 내용을 그대로 붙여넣으세요.)
-
-```ini
-# 🚫 절대 이 파일을 다른 사람과 공유하지 마세요!
-CLIENT_ID=여기에_발급받은_Client_ID를_붙여넣습니다
-CLIENT_SECRET=여기에_발급받은_Secret을_붙여넣습니다
-MODE=LIVE  # 실제 운영 환경 사용
-```
-
-⚠️ **주의**: `.env` 파일은 Git 에 커밋하지 마세요! (`.gitignore` 에 포함되어 있어야 합니다.)
-
-## 3️⃣ 데이터 수집 파이프라인 가동
-파일 내용을 입력하고 저장 (`Ctrl+S`) 한 후, 터미널에서 아래 명령어를 실행하세요.
-
+### 1️⃣ 환경 파일 생성
+위 `.env.example` 파일을 복사하여 `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env` 로 저장합니다.
 ```bash
-cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools"
-python3 setup_env.py
+cp .env.example .env
+nano .env
+# 또는 VS Code 등을 열어 각 ID/Secret 칸에 직접 입력
 ```
 
-- 코다리가 `setup_env.py` 를 최적화했습니다. 이 스크립트가 `.env` 파일을 읽어 API 연동을 시도합니다.
-- 성공하면 매출 데이터가 자동으로 수집되어 현빈의 가격 전략 분석에 사용됩니다.
+### 2️⃣ API 키 발급 (PayPal Developer Dashboard)
+1. [https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications) 접속
+2. **Apps & Credentials** 메뉴 클릭
+3. **+ Create App** 버튼 → 앱명 (예: `Makemoney-Track1`) 입력 → 생성
+4. 생성된 **Client ID** 복사하여 `.env` 의 `KTALK_CLIENT_ID` 에 붙여넣기
+5. **Generate Secret** → 새 비밀번호 생성 → `KTALK_CLIENT_SECRET` 에 붙여넣기
+6. Track 2도 같은 방법으로 동일한 앱이거나 별도 앱 생성 후 키를 복사
 
-## 💰 예상 ROI
-- **API 키 입력 완료 후**: 매월 30 일 결제 데이터 수집 가능.
-- **데이터 기반 가격 전략 (7 일 패스 vs 월간 무제한)**: 전환율 최적화로 **20% 이상의 매출 증대** 예상.
-- **첫 번체 데이터 수집 시점**: 오늘 밤에 자동 실행되어 내일 아침부터 분석이 시작됩니다.
+### 3️⃣ 자동화 파이프라인 가동
+환경 파일이 준비되면 코다리가 다음 명령어로 매출 데이터를 즉시 수집합니다.
+```bash
+python3 /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/setup_env.py
+```
+
+> 📈 **목표**: 오늘 저녁 8 시까지 첫 번째 결제 데이터 확보 및 분석 자동화 시작.
 
 ---
-*현빈 (머니메이커) 이 작성했습니다.*
+*작성자: 💰 현빈 (머니메이커) | 날짜: 2026-08-27*
