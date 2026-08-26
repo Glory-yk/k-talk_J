@@ -1,53 +1,27 @@
-# 🗝️ PayPal API 키 입력 가이드 (사장님 전용)
+# 💰 PayPal API 키 입력 가이드 — 사장님용
 
-## 📋 작업 개요
-**목표**: PayPal 매출 데이터 자동화 파이프라인 가동을 위해 `CLIENT_ID`와 `CLIENT_SECRET`를 환경 변수에 설정합니다.
+## 📌 왜 필요한가요?
+현재 K-Talk AI 와 WorkAbroad AI 의 결제 시스템이 연결되어 있지 않아 매출 데이터가 수집되지 않습니다.  
+PayPal Developer Dashboard 에서 발급받은 **Client ID**와 **Secret Key**를 입력해야 합니다.
 
-**중요**: 이 키는 보안상 `.env` 파일에 저장되며, 절대 공개하지 마세요.
+## 🔑 키 발급 방법 (3 분)
+1. https://developer.paypal.com/dashboard/applications 로 접속
+2. "Apps & Credentials" 섹션에서 본인 앱 생성 또는 기존 앱 선택
+3. "Live" 환경 설정 → "Generate Client ID and Secret" 클릭
+4. 복사된 키를 아래 입력란에 붙여넣기
 
----
+## 📋 입력 위치
+- 파일 경로: `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/paypal_revenue.json`
+- 또는 환경 변수로 설정 시 `.env` 파일 확인 (`.gitignore` 등록됨)
 
-## 🚀 실행 방법 (3 단계)
-
-### 1️⃣ PayPal Developer Dashboard 에서 키 발급
-```bash
-https://developer.paypal.com/dashboard/applications
-→ Apps & Credentials → 본인 앱 선택
-→ Client ID 복사
-→ Generate Secret 클릭 후 Secret 복사
-```
-
-### 2️⃣ 환경 변수 파일 생성/수정
-다음 명령어로 `.env` 파일 생성 (없다면):
+## ✅ 성공 확인 방법
 ```bash
 cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools"
-touch .env
+python3 paypal_revenue.py
 ```
-
-`.env` 파일 내용 입력:
-```env
-CLIENT_ID=여기에_복사한_Client_ID 붙여넣기
-CLIENT_SECRET=여기에_복사한_Secret 붙여넣기
-```
-
-### 3️⃣ 파이프라인 재가동
-```bash
-python3 setup_env.py
-```
+> 결과: "✅ API 인증 완료! 데이터 수집 시작합니다."
 
 ---
 
-## ⚠️ 주의사항
-- 키는 `.env` 파일에 저장되며, 시스템 권한이 필요할 수 있습니다.
-- 첫 실행 시에는 키 입력 후 재시도 필요 (1~2 회)
-- 키 분실 시 Dashboard 에서 재발급 가능
-
-## 💰 예상 수익 효과
-- API 키 설정 완료 후 **매출 데이터 실시간 수집** 시작
-- **가격 전략 자동 최적화**로 전환율 10~15% 향상 예상
-- **월간 수익 증대**: 현재 가격 ($9.99) 대비 최적화 시 $12~$14 목표
-
----
-
-**📊 평가: 대기 — 사장님께서 API 키 입력 후 `setup_env.py` 재실행 필요**
-📝 다음 단계: 사장님이 `.env` 파일에 API 키 입력 및 `setup_env.py` 재실행 지시
+⏱️ **지금 바로 발급하세요!** 첫 매출 데이터를 통해 가격 전략을 수립할 수 있습니다.  
+**예상 수익**: 7 일 패스 기준 월 50 명 이상 시 $250+/월 가능
