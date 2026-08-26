@@ -1,24 +1,23 @@
-# 💰 PayPal API 키 입력 가이드 (현빈 승인)
+# 🚀 API 설정 가이드 (PayPal Revenue Analysis)
 
-## 1. 목적
-- **K-Talk AI** 및 **WorkAbroad AI** 에서 실제 결제 데이터를 수집하여 수익화 전략 수립
-- **PayPal Developer Dashboard** 에서 발급받은 `CLIENT_ID` 와 `CLIENT_SECRET` 을 안전하게 저장
+## 📌 필수 입력 사항
+`setup_env.py` 를 실행하기 전, 다음 정보를 반드시 `.env` 파일에 입력해야 합니다.
 
-## 2. 실행 순서
-1. **[중요]** `.env.template` 파일 내용을 복사합니다.
-2. **[동작]** `sk-proj-...` 부분을 실제 발급받은 키로 바꿉니다. (개발자/샌드박스 환경 권장)
-3. **[안전]** 변경된 내용은 절대 타인에게 공유하지 않습니다.
+### 1️⃣ PayPal Developer Dashboard 에서 발급 필요
+- **웹사이트**: [https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications)
+- **동작**: `Apps & Credentials` → 본인 앱 생성 → **Live Mode** 전환 → Client ID 및 Secret 복사
 
-## 3. 입력 후 실행
+### 2️⃣ .env 파일 구조 (자동 생성됨, 수동 확인 필요)
 ```bash
-cp .env.template .env
-# 위 명령어는 복사본을 생성합니다. 실제 키를 .env 에 직접 붙여넣기 전에 이 가이드를 다시 읽으세요.
-python3 setup_env.py
+CLIENT_ID=your_paypal_client_id_here
+CLIENT_SECRET=your_paypal_secret_here
+APP_NAME=Makemoney AI Lab
 ```
 
-## 4. 기대 효과
-- 매출 데이터 수집 자동화 (7 일 패스, 월간 무제한 등)
-- 가격 번들 옵션 전략 수립을 위한 정확한 데이터 확보
+## 🛠️ 실행 방법
+1.  위 사이트에서 본인의 앱 자격 증명 (Client ID, Secret) 을 발급받습니다.
+2.  `.env` 파일을 엽니다. (시스템이 자동으로 생성해 줍니다.)
+3.  발급받은 값을 복사하여 `.env` 에 붙여넣습니다.
+4.  다시 터미널을 열고 `setup_env.py` 를 실행합니다.
 
----
-*현빈 (머니메이커) 작성 | Makemoney AI Lab 에서의 첫 번째 달러를 위해!*
+> ⚠️ **주의**: Live Mode 데이터만 분석 가능합니다. Sandbox 는 실제 수익화 데이터를 수집하지 못하므로 주의하세요.
