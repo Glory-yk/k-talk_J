@@ -1,40 +1,29 @@
-# 🛠️ PayPal API 키 입력 가이드 (setup_env.py 실행 전 필수)
+<find>NULL</find><replace># 🛑 PayPal API 키 입력 가이드 — 사장님 전용 매뉴얼
 
-## 📌 목적
-PayPal 매출 분석 파이프라인 가동을 위해 `setup_env.py` 를 실행하기 전, **PayPal Developer Dashboard** 에서 발급한 자격 증명을 `.env` 파일에 입력해야 합니다.
+## 1. 준비물 (PayPal Developer Dashboard)
+[https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications)
+*   **앱 생성:** 'Create App' → 앱명 입력 (예: Makemoney-Live-App)
+*   **Credential 발급:** 앱 상세 페이지 → 'Apps & Credentials' 탭 → 'Show Secret' 클릭
+*   **복사:** Client ID 와 Secret 을 모두 복사
 
-## 📋 필요한 정보 (2026. 8. 26 기준)
-- **Client ID**: PayPal 앱의 Client ID
-- **Client Secret**: PayPal 앱의 Secret
-- **App Name**: `Makemoney-connectAI-PayPal`
+## 2. 환경 변수 파일 입력 (.env)
+1.  아래 경로의 `.env` 파일을 엽니다:
+    `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/.env`
+2.  `CLIENT_ID=` 뒤, `CLIENT_SECRET=` 뒤에 복사한 값을 붙여넣습니다.
+3.  **주의:** 저장하기 전에 마지막 줄의 공백 없이 `#` 해시문 아래로 바로 내려가야 합니다.
 
-## 🔧 실행 방법
+```bash
+# 예시 (실제 값으로 교체하세요)
+CLIENT_ID=Aa1Bb2Cc3Dd4Ee5Ff6Gg7Hh8Ii9Jj0Kk1Ll
+CLIENT_SECRET=MMn0Op1Pq2Rr3Ss4Tt5Uu6Vv7Ww8Xx9Yy0Zz1Aa
+```
 
-### 1️⃣ `.env` 파일 생성 및 편집
+## 3. 데이터 수집 시작
+파일을 저장하고 터미널에서 다음 명령어를 실행합니다:
+
 ```bash
 cd /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools
-nano .env
-# 또는
-vim .env
+python3 setup_env.py
 ```
 
-### 2️⃣ 다음 내용 복사하여 붙여넣기
-```env
-CLIENT_ID=YOUR_CLIENT_ID_HERE
-CLIENT_SECRET=YOUR_CLIENT_SECRET_HERE
-APP_NAME=Makemoney-connectAI-PayPal
-```
-
-### 3️⃣ 자격 증명 입력 (PayPal Developer Dashboard)
-- https://developer.paypal.com/dashboard/applications
-- **Apps & Credentials** → 본인 앱 선택 → Client ID + Secret 복사 → `.env` 파일에 붙여넣기
-
-### 4️⃣ `.env` 파일 저장 후 종료
-- `setup_env.py` 를 다시 실행하면 오류 없이 매출 데이터를 수집합니다.
-
-## ⚠️ 주의사항
-- **Client ID** 와 **Client Secret** 은 민감한 정보이므로 절대 타인에게 공개하지 마세요.
-- `.env` 파일은 `.gitignore` 에 추가되어 있지 않으니 버전 관리 전에 확인하세요.
-
----
-💰 현빈 (머니메이커) — 2026. 8. 26
+이후 코다리가 매출 데이터를 가져와 현빈에게 전달합니다. 기대하세요! 💰</replace>
