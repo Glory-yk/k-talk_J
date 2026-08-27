@@ -1,16 +1,22 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head><meta charset="UTF-8"><title>API 입력 가이드</title></head>
-<body style="font-family: sans-serif; padding: 20px;">
-    <h1>🔑 PayPal API 자격 증명 입력 안내</h1>
-    <p>대표님, 첫 달러를 만들기 위해 아래 정보를 복사해서 설정해 주세요.</p>
-    <ol>
-        <li><strong>PayPal Developer Dashboard</strong> 접속: <a href="https://developer.paypal.com/dashboard/applications" target="_blank">클릭</a></li>
-        <li><strong>Apps & Credentials</strong> 메뉴로 이동</li>
-        <li><strong>Create App</strong> → "Live" 환경 선택 (실제 결제가 되는 곳)</li>
-        <li>앱 생성 후 화면에 뜨는 <code>Client ID</code> 와 <code>Secret</code> 복사</li>
-        <li>복사된 값을 터미널弹出的 입력창이나 `paypal_revenue.json` 에 붙여넣기</li>
-    </ol>
-    <p><em>주의: 테스트용 샌드볼이 아닌 실제 라이브 환경으로 설정해야 매출이 발생합니다.</em></p>
-</body>
-</html>
+# 📝 API 키 입력 요청서 ( срочная )
+**발행일:** 2026. 8. 27
+**수신자:** 사장님 (사용자)
+**요청 사항:** PayPal API Client ID 및 Secret 발급 및 입력
+
+## 🛑 왜 지금 필요한가요?
+- **현실:** 현재 `setup_env.py` 가 실행되었으나, **API 키가 누락되어 매출 데이터 수집이 차단됨**.
+- **비용:** 개발 시간 $0 (이미 코딩 완료), 기회비용 = 매일 $0 의 수익 상실.
+- **해결법:** 1 분 내 PayPal Developer Dashboard 에서 발급받은 키를 입력하세요.
+
+## 📥 발급 및 입력 방법
+1. [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications) 접속
+2. `Apps & Credentials` > `Live` 탭 이동
+3. **Client ID** 복사 → 아래 입력창 붙여넣기
+4. **Secret Key** 복사 → 아래 입력창 붙여넣기
+
+## 💸 예상 수익 (입력 즉시 가동)
+- **K-Talk AI**: 7 일 패스 $4.99 / 월간 $9.99
+- **WorkAbroad AI**: 7 일 패스 $9.99 / 월간 $24.99
+- **목표:** 오늘 첫 거래 $5~$25 확보
+
+**지금 입력하세요! 데이터 없는 전략은 장난입니다.**
