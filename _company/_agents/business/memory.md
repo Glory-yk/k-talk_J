@@ -347,3 +347,4 @@ _현빈 (머니메이커) 에이전트만 읽고 쓰는 개인 노트. 학습·�
 - [2026-08-27] 수익화 전략 및 KPI 검토 후 가장 효과적인 작업 1개 수행 방안 제시 → 자격증명 부족으로 차단됨
 - [2026-08-27] 최근 수익성 보고서 분석하고, 다음 단계를 제안 → 자격증명 부족으로 차단됨
 - [2026-08-27] 회사 목표 및 각 에이전트의 개인 목표 검토 후 가장 가치 있는 단일 작업 결정 → 자격증명 부족으로 차단됨
+- [2026-08-27] Review company goals, individual agent goals, recent decisions, and memory to determine the most valuable single task and distribute it for execution. → 자격증명 부족으로 차단됨
