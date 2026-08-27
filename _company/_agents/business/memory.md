@@ -350,3 +350,4 @@ _현빈 (머니메이커) 에이전트만 읽고 쓰는 개인 노트. 학습·�
 - [2026-08-27] Review company goals, individual agent goals, recent decisions, and memory to determine the most valuable single task and distribute it for execution. → 자격증명 부족으로 차단됨
 - [2026-08-27] 회사 목표와 각 에이전트 개인 목표를 검토하여, 현재 가장 가치 있는 단일 작업을 결정하고, 필요한 에이전트들에게 할당 → 자격증명 부족으로 차단됨
 - [2026-08-27] 최근의 의사결정과 에이전트들의 목표(_agents/{id}/goal.md)를 검토하여 수익화를 위한 가장 가치 있는 단일 작업을 결정하고, 해당 작업을 실행할 에이전트를 선택하여 할당 → 자격증명 부족으로 차단됨
+- [2026-08-27] 회사 목표와 각 에이전트의 개인 목표를 검토해서 가장 가치 있는 단일 작업을 결정하고, 그 작업을 진행하는 에이전트를 지정 → 자격증명 부족으로 차단됨
