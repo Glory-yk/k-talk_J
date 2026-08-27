@@ -1,37 +1,51 @@
-<![CDATA
-# 💰 PayPal API 키 입력 가이드 (현빈용)
+# 💰 PayPal API 키 입력 가이드
 
-## 🚨 주의사항: 이 파일은 직접 실행하지 마세요!
-- 시스템이 자동으로 `setup_env.py` 로 환경 설정을 진행 중입니다.
-- 아래 지시를 따르세요.
+## 🎯 목적
+Makemoney AI Lab 의 K-Talk AI 와 WorkAbroad AI 가 실제 수익을 발생시키려면 PayPal Live 환경과 연동해야 합니다. 이 파일을 참고하여 `Client ID` 와 `Client Secret` 을 `.env` 파일에 안전하게 입력하세요.
 
----
+## ⚠️ 보안 주의사항
+- **절대**: API 키를 GitHub 등에 업로드 금지
+- **필수**: `.gitignore` 에 `.env` 파일 추가 (코다리가 자동 처리 중)
+- **관리**: 1인 기업의 핵심 자산이므로 개인 메모리나 지갑 비밀번호만큼 엄격히 관리하세요.
 
-## 1️⃣ PayPal Developer Dashboard 접속
-https://developer.paypal.com/dashboard/applications 에서 로그인하세요.
+## 🛠️ 발급 및 입력 절차
 
-## 2️⃣ 앱 생성 및 자격 증명 발급
-- `Apps & Credentials` 메뉴로 이동합니다.
-- **Live** 환경의 앱을 선택합니다. (개발용이 아님!)
-- **Client ID** 와 **Secret Key** 를 복사합니다.
+### 1. PayPal Developer Dashboard 접속
+```text
+https://developer.paypal.com/dashboard/applications
+```
+→ `Apps & Credentials` → `Live` 탭 이동
 
-## 3️⃣ API 키 입력 지시
-코다리가 준비한 환경에서 아래 명령어를 실행하면 `setup_env.py` 가 자동으로 실행됩니다:
+### 2. 앱 생성 또는 복사
+- **생성**: `Create App` → `Business (Live)` 선택 → `Live Mode` 설정
+- **복사**: 기존 앱의 `Client ID` 와 `Secret` 을 복사합니다.
+  - **Client ID**: 긴 문자열 (예: `AbCdEfGhIjKlMnOpQrStUvWxYz...`)
+  - **Client Secret**: 긴 문자열 (예: `1234567890abcdefghijklmnopq...`)
+
+### 3. `.env` 파일 입력
+저장된 키를 아래 명령어 또는 텍스트 에디터로 `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env` 에 입력하세요.
+
 ```bash
-cd /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools && python3 setup_env.py
+# 다음 내용을 .env 파일에 저장하세요.
+CLIENT_ID=여기에_실제_Client_ID_붙여넣기
+CLIENT_SECRET=여기에_실제_Client_Secret_붙여넣기
+CURRENCY_KOR_WON=false  # 현재는 달러/엔 결제만 활성화 (글로벌 타겟)
 ```
 
-실행 후 터미널에 "Client ID 를 입력하세요"라는 메시지가 뜹니다. 복사한 Client ID 를 붙여넣으세요.
+### 4. 테스트 및 검증
+입력 후 아래 명령어로 연동 테스트를 진행하세요. 성공하면 `success` 메시지, 실패하면 에러 로그가 나옵니다.
+```bash
+cd /Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools
+python3 paypal_revenue.py --test-mode
+```
 
-## 4️⃣ Secret Key 입력
-이후 "Secret Key 를 입력하세요"라는 메시지가 뜹니다. 복사한 Secret Key 를 붙여넣으세요.
+## 🚀 수익화 예상 (입력 후 즉시 시작)
+- **K-Talk AI**: 1 일 무료 체험 → $4.99 (7 일 패스)
+- **WorkAbroad AI**: 무료 상담 → $9.99 (7 일 패스) / $24.99 (월간)
+- **목표**: 오늘 하루 1 건의 실제 결제 데이터 확보 ($5~$25)
+
+## 💡 현빈 (머니메이커) 의 전략
+API 키 입력 후 첫 번째 매출 데이터를 분석하여 **가격 번들 최적화**를 진행하겠습니다. 대표님, `Client ID` 와 `Secret` 을 `.env` 파일에 입력하신 후 코다리에게 환경 설정 실행을 지시하세요.
 
 ---
-
-## 💰 예상 수익 및 KPI
-- **제1 목표:** 첫 번째 실제 매출 데이터 1 건 확보 ($4.99 또는 $9.99)
-- **ROI:** API 키 설정 비용 = $0, 예상 첫 매출 = $5~$25 (데이터 수집 성공 시)
-
-## 📊 평가: 진행중 — 코다리의 환경 설정 실행 및 사용자 API 키 입력 대기
-📝 다음 단계: `setup_env.py` 가동 후 사용자에게 "API 키를 입력하세요" 알림 유도
-]]>
+*마지막 수정: 2026-08-27 | 작성자: 💰 현빈 (머니메이커)*
