@@ -1,64 +1,29 @@
-# 🔑 PayPal API 자격증명 입력 가이드 — 최종판 2026.08.29
+# 🚨 API 키 입력 필수 가이드 (코다리 실행 시 사용)
 
-## ⚠️ 중요: 지금 바로 해야 할 것
+## ⚠️ 지금 당장 해야 할 일
+`setup_env.py` 가동 후 터미널이 `Client ID` 와 `Secret` 을 요구하면 아래 내용을 복사해서 사용자에게 안내하세요.
 
-```bash
-💰 현빈 (머니메이커) 가 준비했습니다.
-먼저 아래 URL 에 접속하세요 → https://developer.paypal.com/dashboard/applications
-```
+### 1️⃣ PayPal Developer Dashboard 접속
+- URL: `https://developer.paypal.com/dashboard/applications`
+- 본인 계정으로 로그인 → **Apps & Credentials** 섹션 이동
+
+### 2️⃣ App 생성 및 키 발급
+- **Live Environment** 선택 (실제 결제 사용)
+- **Create App** 클릭 후 앱 이름 입력 (예: `Makemoney-Ktalk-AI`)
+- 앱 생성 후 **Copy Client ID** 및 **Copy Secret** 버튼 누름
+
+### 3️⃣ 키 복사 및 저장
+- 복사된 키는 터미널 또는 코드 변수에 바로 붙여넣기
+- `.env` 파일에 `CLIENT_ID=...`, `CLIENT_SECRET=...` 로 저장 (보안 권장)
+
+---
+
+## 💰 예상 수익 (입력 즉시 가동됨)
+- **Track 1 (K-Talk AI):** $4.99/7일, $9.99/월 → 첫 매출 목표 $5~$25
+- **Track 2 (WorkAbroad AI):** $9.99/7일, $24.99/월 → 첫 매출 목표 $10~$50
+- **오늘 목표:** 데이터 수집 성공 시 자동화 판로 가동
 
 ---
 
-## 📋 입력 단계별 가이드
-
-### **Step 1: PayPal Developer Dashboard 접속**
-
-```
-🌐 https://developer.paypal.com/dashboard/applications
-→ Apps & Credentials 선택
-→ "Live" 환경 탭 클릭 ( sandsandbox 는 X )
-```
-
-### **Step 2: 앱 생성 또는 기존 앱 사용**
-
-- **새 앱**: "+ Create App" → 앱명 입력 → 생성 완료
-- **기존 앱**: 이미 있는 앱 목록에서 선택
-
-### **Step 3: Client ID 복사**
-
-```
-✅ 앱 설정 페이지 → "Live" 탭
-→ "Client ID" 값 전체 선택 → 복사 (Ctrl+C / Cmd+C)
-```
-
-### **Step 4: Secret Key 생성 및 복사**
-
-```
-1. "Generate Secret" 버튼 클릭
-2. 보안 확인 팝업 → OK
-3. Secret 값 전체 복사
-```
-
-### **Step 5: 현빈에게 전달**
-
-<create_file path="/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/api_input_prompt.md">
----
-🔐 **현빈 (머니메이커) 에게 입력하세요:**
-
-```
-CLIENT_ID = <여기에 Client ID 붙여넣기>
-CLIENT_SECRET = <여기에 Secret 붙여넣기>
-```
-
-**⚠️ 주의사항:**
-- 🔒 비밀번호 형식이므로 안전한 곳에 보관
-- ❌ 누구에게도 공유 금지
-- ✅ 입력 후 `setup_env.py` 실행을 요청할 것
-
-**예시:**
-```python
-client_id = "AbCdEfGhIjKlMnOpQrStUvWxYz1234567890"
-client_secret = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz123456"
-```
-
----
+## 📞 코다리에게 전달할 메시지
+"현빈이 API 키 입력 완료까지 대기 중입니다. 사용자로부터 키를 얻어 `setup_env.py` 로직 적용 후, 현빈이 바로 매출 분석을 시작하겠습니다."
