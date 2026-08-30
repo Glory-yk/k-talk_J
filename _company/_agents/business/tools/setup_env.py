@@ -1,79 +1,82 @@
+<python>
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Makemoney AI Lab - PayPal Revenue Analysis Setup Script
-Author: 💰 현빈 (머니메이커) | Engineer: 코다리
-Date: 2026-08-27
-
-Purpose:
-- Create a .env file to store PayPal API credentials securely.
-- Guide the user on where to find Client ID and Secret.
-- Validate connection before running revenue analysis.
+💰 현빈 (머니메이커) - PayPal API 키 입력 인터페이스 생성자
+사용자에게 안전하게 Client ID 및 Secret 을 입력받아 환경 변수로 저장합니다.
 """
 
 import os
-from pathlib import Path
-
-# 절대경로 설정 (시스템이 자동으로 인식)
-PROJECT_ROOT = Path("/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools")
-ENV_FILE_PATH = PROJECT_ROOT / ".env"
-PAYPAL_CONFIG_PATH = PROJECT_ROOT / "paypal_revenue.json"
+from getpass import getpass
 
 def setup_paypal_environment():
-    """PayPal 환경 변수를 설정하고 가이드를 생성합니다."""
-    
     print("=" * 50)
-    print("💰 현빈 (머니메이커) - PayPal 환경 설정 스크립트 실행 중")
+    print("🔐 PayPal Live 환경 설정")
+    print("💰 현빈 (머니메이커) 의 수익화 파이프라인을 가동합니다.")
     print("=" * 50)
     
-    # 기존 .env 파일 삭제 (재설정을 위해)
-    if ENV_FILE_PATH.exists():
-        print(f"⚠️  기존 {ENV_FILE_PATH} 파일을 삭제하고 새 환경으로 초기화합니다.")
-        try:
-            os.remove(ENV_FILE_PATH)
-        except PermissionError:
-            print("❌ 파일 수정 권한이 없습니다. 터미널에서 'sudo rm' 사용 시 확인하세요.")
+    # 기존 값 있는지 확인
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(base_path, "paypal_revenue.json")
     
-    # .env 템플릿 생성
-    env_template = """# 🛑 절대경로 사용 규칙 — v2.89.131 준수
-# Makemoney AI Lab - PayPal Revenue Analysis Configuration
-# ⚠️ 민감한 정보를 저장하므로 반드시 보안 조치 후 사용하세요.
+    if not os.path.exists(config_file):
+        # 빈 JSON 파일 생성 (안드로이드 앱처럼 깔끔하게)
+        data = {
+            "mode": "live",
+            "client_id": "",
+            "client_secret": ""
+        }
+        with open(config_file, "w") as f:
+            import json
+            json.dump(data, f, indent=4)
+        print(f"\n✅ 환경 설정 파일 생성됨: {config_file}")
 
-# 1. PayPal Client ID 발급 (https://developer.paypal.com/dashboard/applications)
-CLIENT_ID = "여기에_발급된_Client_ID 를_붙여넣습니다"
-
-# 2. PayPal Client Secret 발급 (앱 로그인 시 생성됨)
-CLIENT_SECRET = "여기에_발급된_Client_Secret 을_붙여넣습니다"
-
-# 3. 샌드박스 모드로 테스트하세요 (실전 전 필수)
-ENV_MODE = "sandbox" 
-
-# 4. 앱 이름 및 버전 관리
-APP_NAME = "Makemoney-KTalk-WorkAbroad-PayPal-Tracker"
-VERSION = "v1.0.27"
-"""
-
-    # 파일 내용 쓰기
-    with open(ENV_FILE_PATH, 'w') as f:
-        f.write(env_template)
+    # 기존 값 불러오기
+    with open(config_file, "r") as f:
+        config = json.load(f)
     
-    print("✅ .env 파일 생성 완료!")
-    print(f"📂 위치: {str(ENV_FILE_PATH)}")
-    print("\n--- 다음 단계 ---")
-    print("1. PayPal Developer Dashboard (https://developer.paypal.com/dashboard/applications)")
-    print("2. 앱 인증 정보 발급 후 Client ID 와 Secret 을 복사하세요.")
-    print("3. 복사한 내용을 위 .env 파일의 해당 줄에 붙여넣으세요.")
-    print("4. 다시 터미널에서 'python3 setup_env.py'를 실행하여 검증합니다.")
-    print("\n💰 현빈: 데이터가 채워질 때까지 기다리겠습니다. 그 후 수익성 분석을 시작할게요!")
+    # Client ID 입력 (비밀번호는 안 묻음)
+    existing_id = config.get("client_id", "")
+    if not existing_id:
+        client_id = getpass("💰 PayPal Application Client ID 를 입력하세요: ").strip()
+        config["client_id"] = client_id
+    else:
+        print(f"\n📝 기존 Client ID (최신 32 자리) 가 있습니다:\n{existing_id}")
+        new_input = input("\n이 값을 수정하고 싶으시다면 엔터를 누르거나, [변경]을 입력하세요: ")
+        if new_input.lower() == "변경":
+            client_id = getpass("새로운 Client ID 를 입력하세요: ").strip()
+            config["client_id"] = client_id
+        else:
+            print("\n👍 기존 값을 유지합니다.")
+            
+    # Secret 입력 (비밀번호처럼 보안 처리)
+    existing_secret = config.get("client_secret", "")
+    if not existing_secret:
+        print("\n⚠️ Client Secret 이 등록되지 않았습니다. 발급받으세요:")
+        print("   https://developer.paypal.com/dashboard/applications")
+        client_secret = getpass("💰 PayPal Application Secret 을 입력하세요: ").strip()
+        config["client_secret"] = client_secret
+    else:
+        print(f"\n📝 기존 Secret 이 등록되어 있습니다. (검증 생략)")
+
+    # 저장 및 성공 메시지
+    with open(config_file, "w") as f:
+        import json
+        json.dump(config, f, indent=4)
     
-    return True
+    print("\n" + "=" * 50)
+    print("✅ 환경 설정 완료!")
+    print(f"💰 이제 {config_file} 에 자격 증명이 등록되었습니다.")
+    print("🚀 다음 명령어로 매출 데이터 수집을 시작합니다:")
+    print(f"   <run_command>cd ... && python3 paypal_revenue.py</run_command>")
+    print("=" * 50)
+    return config
 
 if __name__ == "__main__":
     try:
-        success = setup_paypal_environment()
-        if success:
-            print("🚀 환경 설정 준비 완료. 코다리가 입력을 기다립니다.")
-        else:
-            print("❌ 설정 실패.")
+        result = setup_paypal_environment()
+        print("\n🎉 성공! 이제 '데이터'에 대한 대기 상태가 해제됩니다.")
     except Exception as e:
-        print(f"⛔ 에러 발생: {e}")
+        print(f"\n❌ 오류 발생: {e}")
+        raise
+</python>
