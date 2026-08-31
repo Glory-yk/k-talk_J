@@ -1,14 +1,14 @@
-<markdown># 📝 오늘 할 일 (CEO 승인)
+<find>20분 전</find><replace>[🔥 1 단계: API 키 입력 및 환경 구축 (코다리)]
+- 작업: `setup_env.py` 실행 → 사용자 화면에 PayPal Client ID/Secret 입력 폼 표시
+- 목표: API 키 채워짐 즉시 매출 분석 파이프라인 자동 가동
+- 우선순위: 🔴 최우선
 
-## [우선순위 1: 결제 시스템 가동]
-- **코다리**: `setup_env.py` 실행 후 사용자에게 PayPal Client ID/Secret 입력 유도.
-  - 파일: `/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/setup_env.json` (설정값 저장용)
-- **현빈**: 데이터 수집 로직 검증 및 가격 전략 템플릿 적용 준비.
+[💰 2 단계: 가격 전략 템플릿 및 분석 로직 준비 (현빈)]
+- 작업: `price_strategy_template.md` 생성 ($4.99 vs $9.99 전환율 시나리오 포함)
+- 목표: 코다리가 API 키 입력 완료하자마자 데이터 수집 후 즉시 ROI 계산 가능
+- 우선순위: 🟡 2 순위
 
-## [우선순위 2: 마케팅 퍼널 최적화]
-- **클레어**: 일본인 타깃 바이럴 대본 초안 검토 후 세일즈 퍼널에 맞게 수정.
-
-## [우선순위 3: 내부 문서화]
-- **영숙**: 에이전트 할당 및 일정을 브리핑.
-
-</markdown>
+[📢 3 단계: 트래픽 유입 대비 (클레어)]
+- 작업: 기존 바이럴 대본 검토 및 일본인 타깃 최적화
+- 목표: API 키 입력 완료 시 즉시 트래픽 유입 시작
+- 우선순위: 🟢 3 순위</replace>
