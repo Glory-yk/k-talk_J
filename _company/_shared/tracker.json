@@ -118,6 +118,40 @@
       "preAlarmsSent": [],
       "evidence": "완료: sessions/2026-08-25T21-28/_report.md\n- 현빈 (머니메이커): 회사 목표와 각 에이전트 개인 목표를 검토한 후 가장 가치 있는 작업 1개 결정하고 진행\n\nCEO 종합 요점: 💰 현빈 (머니메이커): 작업 시작합니다.\n\n대표님, 지금 가장 시급한 것은 **PayPal API 환경 설정**입니다. 수익화 데이터 없이는 모든 전략이 공허하니, 코다리와 협력해 바로 파이프라인을 가동하겠습니다. 우선 가이드를 최신화하고 실행 환경을 점검합니다.\n\n<create_file path=\"/Users/glory/Desktop/coding/Ma",
       "completedAt": "2026-08-25T21:30:52.214Z"
+    },
+    {
+      "id": "20260901181108-7yvx",
+      "title": "**자동화:** 7 일 체험 종료 1 시간 전 이메일 발송 (유료 전환 유도).",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-09-01T18:11:08.911Z",
+      "status": "done",
+      "sessionDir": "2026-09-01T18-07",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-09-01T18-07/_report.md\n- 현빈 (머니메이커): 현재 수익 모델 분석 및 최적화 방안 제안\n\nCEO 종합 요점: 💰 현빈 (머니메이커): 수익 모델 분석을 위해, 실제 매출 데이터가 없는 지금 가장 먼저 해결해야 할 전제 조건은 **PayPal API 환경 구축**입니다. 코다리에게 `setup_env.py` 를 통해 사용자 입력 창을 띄워 실제 결제 흐름 검증 후, 그 다음 단계로 가격 전략 시나리오를 즉시 작성하겠습니다.\n\n```xml\n<run_command>c",
+      "completedAt": "2026-09-01T18:11:08.913Z"
+    },
+    {
+      "id": "20260901181108-lqwu",
+      "title": "**할인 전략:** \"지금 결제하면 추가 3 일 무료\" 제공 시 $9.99 → $8.99 로 단기 매출 증대 테스트.",
+      "description": "자동 등록 (현빈 (머니메이커) 산출물에서 추출)",
+      "owner": "agent",
+      "agentIds": [
+        "business"
+      ],
+      "createdAt": "2026-09-01T18:11:08.912Z",
+      "status": "done",
+      "sessionDir": "2026-09-01T18-07",
+      "nudges": 0,
+      "priority": "normal",
+      "preAlarmsSent": [],
+      "evidence": "완료: sessions/2026-09-01T18-07/_report.md\n- 현빈 (머니메이커): 현재 수익 모델 분석 및 최적화 방안 제안\n\nCEO 종합 요점: 💰 현빈 (머니메이커): 수익 모델 분석을 위해, 실제 매출 데이터가 없는 지금 가장 먼저 해결해야 할 전제 조건은 **PayPal API 환경 구축**입니다. 코다리에게 `setup_env.py` 를 통해 사용자 입력 창을 띄워 실제 결제 흐름 검증 후, 그 다음 단계로 가격 전략 시나리오를 즉시 작성하겠습니다.\n\n```xml\n<run_command>c",
+      "completedAt": "2026-09-01T18:11:08.913Z"
     }
   ]
 }
