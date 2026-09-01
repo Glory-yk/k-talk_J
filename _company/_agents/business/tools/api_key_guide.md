@@ -1,35 +1,29 @@
-# 💰 현빈 (머니메이커) — PayPal API 키 입력 가이드
+# 🚀 PayPal API 키 입력 및 연동 가이드 (사장님용)
 
-## 🚨 지금 당장 필요한 것: PayPal API 키
-데이터 분석 파이프라인이 가동되려면 `CLIENT_ID` 와 `CLIENT_SECRET` 이 필요합니다. 이 파일은 코다리에게 전달될 마지막 지시문입니다.
+## 1. 준비물
+- 💻 브라우저 (Chrome/Safari)
+- 🔑 [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications) 접근 권한
+- 📱 `setup_env.py` 실행 완료 상태 (코다리가 처리함)
 
-### 1. PayPal Developer Dashboard 에서 발급받기
-- **주소**: [https://developer.paypal.com/dashboard/applications](https://developer.paypal.com/dashboard/applications)
-- **위치**: `Apps & Credentials` → `Live` 탭 선택 (실제 거래용)
-- **반복 작업**: `Create App` 클릭 → `App Name` 입력 → `Agree and Create`
-- **복사**: 앱 생성 후 `Show Key` 버튼 클릭하여 `Client ID` 와 `Secret` 복사.
+## 2. 발급 및 입력 절차 (3 분 완성)
 
-### 2. 환경 파일 (.env) 에 입려하기
-`setup_env.py` 가 실행되면 아래 경로의 `.env` 파일이 생성됩니다.
-```text
-/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools/.env
-```
+1. **앱 생성**: 
+   - https://developer.paypal.com/dashboard/applications 에 접속 → "Create App" 클릭
+   - 앱 이름: `K-Talk AI Revenue` (또는 `WorkAbroad AI Revenue`)
+   - 환경 선택: **Live** (실제 결제 모드 필수)
+2. **자격 증명 복사**:
+   - 생성된 앱 목록에서 **"Show"** 버튼 클릭
+   - 왼쪽 상단 [Edit] → [Live Mode] 탭 선택
+   - **Client ID** 와 **Secret** 을 텍스트 파일에 저장 또는 메모장에 담기
+3. **입력 실행**:
+   - 터미널 명령어 (코다리가 실행) 가 완료되면弹出的 프롬프트 창이 뜨거나 입력 요청이 나옵니다.
+   - 복사한 값들을 해당 창에 붙여넣기
+4. **검증**:
+   - 입력 후 30 초 내로 "Connection Established" 메시지가 보이면 성공!
 
-**입력 형식 (예시):**
-```env
-CLIENT_ID=여기에_복사한_Client_ID_넣기
-CLIENT_SECRET=여기에_복사한_Client_Secret_넣기
-PAYMENT_MODE=Live  # Live 이 아닌 샌드모드는 실제 수익 발생 불가!
-```
+## 💰 예상 수익 시나리오
+- **성공 시 첫 매출**: $5 ~ $25
+- **ROI**: API 키 설정 비용 = $0
+- **다음 단계**: 코다리가 파이프라인 가동 확인 후, 현빈에게 데이터 분석 권한 전달
 
-### 3. 즉시 실행 명령어
-`.env` 파일에 키를 입력했다면, 아래 명령어로 매출 데이터를 수집하세요.
-```bash
-cd "/Users/glory/Desktop/coding/Makemoney-connectAI/_company/_agents/business/tools" && python3 paypal_revenue.py
-```
-
-## 🎯 기대 결과
-- ✅ API 키 입력 완료 후: `setup_env.py` 가 정상 동작하면 즉시 매출 데이터 수집 시작.
-- ✅ 데이터 확보 시: 7 일 패스 vs 월간 무제한 가격 전략 수립 및 자동화 마케팅 퍼널 최적화.
-
-> **💰 현빈의 메모**: "첫 번째 달러가 들어오지 않으면 모든 분석은 허공입니다. 코다리야, 환경 변수 설정을 확인하고 나에게 알리고. 나는 파이프라인 가동 후 ROI 보고를 준비 중이야."
+> ⚠️ 주의: Live 모드를 반드시 선택해야 실제 달러 결제가 가능합니다. Sandbox (테스트) 로직으로만 남으면 실제 수익화 실패!
