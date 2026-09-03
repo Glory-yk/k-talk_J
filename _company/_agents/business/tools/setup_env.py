@@ -1,5 +1,29 @@
 <python>
 #!/usr/bin/env python3
+import os
+from dotenv import load_dotenv
+
+def setup_paypal_env():
+    """PayPal API 환경 변수 설정 및 파일 생성"""
+    # .env 파일 로딩 시도
+    if not load_dotenv():
+        print("❌ .env 파일을 찾을 수 없습니다. 아래 지시사항을 따르세요.")
+        print("- https://developer.paypal.com/dashboard/applications 에서 Live App 생성")
+        print("- Apps & Credentials → Client ID + Secret 복사")
+        print("- 파일 위치: ~/Desktop/coding/Makemoney-connectAI/_company/.env")
+        
+        # .env 파일이 없으면 예시 템플릿 생성
+        env_path = os.path.expanduser("~/Desktop/coding/Makemoney-connectAI/_company/.env")
+        if not os.path.exists(env_path):
+            with open(env_path, 'w') as f:
+                f.write("# PayPal API 설정\n")
+                f.write("CLIENT_ID=\n")
+                f.write("CLIENT_SECRET=\n")
+            print(f"✅ 환경 파일 생성됨: {env_path}")
+
+if __name__ == "__main__":
+    setup_paypal_env()
+
 # -*- coding: utf-8 -*-
 """
 💰 현빈 (머니메이커) - PayPal API 키 입력 인터페이스 생성자
